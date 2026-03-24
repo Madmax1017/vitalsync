@@ -30,7 +30,7 @@ const roles = [
         title: 'Admin Panel',
         description: 'Oversee hospital operations, staffing, analytics, and system configurations.',
         icon: FiShield,
-        link: '#',
+        link: '/admin-dashboard',
         gradient: 'from-indigo-500 to-purple-500',
         iconBg: 'bg-indigo-100',
         iconColor: 'text-indigo-600',
