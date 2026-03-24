@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiClipboard, FiHeart, FiShield, FiUser } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,6 +11,7 @@ const roles = [
         title: 'Doctor Dashboard',
         description: 'Manage patients, appointments, and prescriptions from a single, intelligent command center.',
         icon: FiClipboard,
+        link: '/doctor-dashboard',
         gradient: 'from-violet-500 to-indigo-500',
         iconBg: 'bg-violet-100',
         iconColor: 'text-violet-600',
@@ -19,8 +21,8 @@ const roles = [
         title: 'Nurse Dashboard',
         description: 'Coordinate tasks, track vitals, and manage patient workflows in real time.',
         icon: FiHeart,
+        link: '/nurse-dashboard',
         gradient: 'from-rose-400 to-pink-500',
-        iconBg: 'bg-rose-100',
         iconColor: 'text-rose-600',
         glowColor: 'rgba(251, 113, 133, 0.15)',
     },
@@ -28,6 +30,7 @@ const roles = [
         title: 'Admin Panel',
         description: 'Oversee hospital operations, staffing, analytics, and system configurations.',
         icon: FiShield,
+        link: '#',
         gradient: 'from-indigo-500 to-purple-500',
         iconBg: 'bg-indigo-100',
         iconColor: 'text-indigo-600',
@@ -37,6 +40,7 @@ const roles = [
         title: 'Patient Portal',
         description: 'Access records, book appointments, and communicate with your care team.',
         icon: FiUser,
+        link: '#',
         gradient: 'from-emerald-400 to-teal-500',
         iconBg: 'bg-emerald-100',
         iconColor: 'text-emerald-600',
@@ -95,9 +99,9 @@ export default function NavigationHub() {
                 {/* Role Cards Grid */}
                 <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {roles.map((role, i) => (
-                        <a
+                        <Link
                             key={i}
-                            href="#"
+                            to={role.link}
                             className="group relative flex flex-col p-7 rounded-[2rem] glass overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:bg-white/80 cursor-pointer no-underline"
                             style={{ '--glow-color': role.glowColor }}
                         >
@@ -130,7 +134,7 @@ export default function NavigationHub() {
 
                             {/* Bottom gradient bar */}
                             <div className={`absolute bottom-0 left-0 h-1 w-full opacity-0 scale-x-0 origin-left transition-all duration-500 ease-out group-hover:opacity-80 group-hover:scale-x-100 bg-gradient-to-r ${role.gradient}`} />
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>
