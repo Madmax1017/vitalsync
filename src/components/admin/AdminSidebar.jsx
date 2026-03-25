@@ -6,7 +6,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const menuItems = [
-    { icon: FiGrid, label: 'Dashboard', path: '/admin-dashboard' },
+    { icon: FiGrid, label: 'Dashboard', path: '/admin' },
     { icon: FiBriefcase, label: 'Staff Management', path: '#' },
     { icon: FiUsers, label: 'Patients', path: '#' },
     { icon: FiFileText, label: 'Reports', path: '#' },
@@ -37,8 +37,8 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
                             key={i}
                             onClick={() => item.path !== '#' && navigate(item.path)}
                             className={`group flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 w-full text-left relative overflow-hidden ${isActive
-                                    ? 'bg-gradient-to-r from-violet-600/10 to-indigo-600/5 text-violet-700 shadow-sm border border-violet-200/50'
-                                    : 'text-[#6b6490] hover:bg-white/60 hover:text-[#1e1b32]'
+                                ? 'bg-gradient-to-r from-violet-600/10 to-indigo-600/5 text-violet-700 shadow-sm border border-violet-200/50'
+                                : 'text-[#6b6490] hover:bg-white/60 hover:text-[#1e1b32]'
                                 } ${collapsed ? 'justify-center' : ''}`}
                         >
                             {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-600 rounded-r-full" />}
