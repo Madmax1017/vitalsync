@@ -1,20 +1,5 @@
-import React, { useState } from 'react';
-import { FiClock, FiArrowRight } from 'react-icons/fi';
-
-const initialTasks = {
-    pending: [
-        { id: 1, patient: 'Emily Watson', task: 'Administer IV medication', time: '9:15 AM', priority: 'High', room: '204A' },
-        { id: 2, patient: 'David Park', task: 'Check respiratory therapy', time: '9:45 AM', priority: 'Medium', room: '310B' },
-        { id: 3, patient: 'Maria Garcia', task: 'Prenatal vitals check', time: '10:00 AM', priority: 'Low', room: '115C' },
-    ],
-    inProgress: [
-        { id: 4, patient: 'James Miller', task: 'Cardiac monitoring update', time: '8:30 AM', priority: 'Critical', room: '401A' },
-        { id: 5, patient: 'Sophia Lee', task: 'Blood sugar reading', time: '9:00 AM', priority: 'Medium', room: '208B' },
-    ],
-    completed: [
-        { id: 6, patient: 'Alex Chen', task: 'Post-op wound dressing', time: '7:30 AM', priority: 'High', room: '302A' },
-    ],
-};
+import React, { useState, useEffect } from 'react';
+import { FiClock, FiArrowRight, FiCheckCircle, FiPlayCircle, FiLoader } from 'react-icons/fi';
 
 const priorityStyles = {
     Critical: 'bg-red-100 text-red-700',
@@ -24,74 +9,155 @@ const priorityStyles = {
 };
 
 const columnConfig = {
-    pending: { label: 'Pending', accent: 'bg-amber-400', next: 'inProgress' },
-    inProgress: { label: 'In Progress', accent: 'bg-violet-500', next: 'completed' },
+    pending: { label: 'Pending', accent: 'bg-amber-400', next: 'in-progress' },
+    'in-progress': { label: 'In Progress', accent: 'bg-indigo-500', next: 'completed' },
     completed: { label: 'Completed', accent: 'bg-emerald-500', next: null },
 };
 
 export default function TaskBoard() {
-    const [tasks, setTasks] = useState(initialTasks);
+    const [tasksByStatus, setTasksByStatus] = useState({
+        pending: [],
+        'in-progress': [],
+        completed: []
+    });
 
-    const moveTask = (fromCol, taskId) => {
-        const nextCol = columnConfig[fromCol].next;
-        if (!nextCol) return;
+    const loadTasks = () => {
+        const allTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
 
-        const taskIndex = tasks[fromCol].findIndex(t => t.id === taskId);
-        if (taskIndex === -1) return;
+        const organized = {
+            pending: [],
+            'in-progress': [],
+            completed: []
+        };
 
-        const task = tasks[fromCol][taskIndex];
-        setTasks(prev => ({
-            ...prev,
-            [fromCol]: prev[fromCol].filter(t => t.id !== taskId),
-            [nextCol]: [...prev[nextCol], task],
-        }));
+        allTasks.forEach(task => {
+            if (organized[task.status]) {
+                organized[task.status].push(task);
+            } else {
+                // Fallback for any tasks with status not in our columns
+                organized.pending.push(task);
+            }
+        });
+
+        setTasksByStatus(organized);
+    };
+
+    useEffect(() => {
+        loadTasks();
+
+        // Simulating real-time updates via polling
+        const interval = setInterval(() => {
+            loadTasks();
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const moveTask = (taskId, newStatus) => {
+        const allTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        const updatedTasks = allTasks.map(task => {
+            if (task.id === taskId) {
+                return { ...task, status: newStatus };
+            }
+            return task;
+        });
+
+        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        loadTasks(); // Update immediate UI
+    };
+
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case 'pending': return <FiLoader className="w-3 h-3 animate-spin-slow" />;
+            case 'in-progress': return <FiPlayCircle className="w-3 h-3" />;
+            case 'completed': return <FiCheckCircle className="w-3 h-3" />;
+            default: return null;
+        }
     };
 
     return (
-        <div className="p-5 rounded-2xl glass">
-            <div className="flex items-center justify-between mb-5">
+        <div className="p-6 rounded-3xl glass-strong border border-white/20 shadow-xl overflow-hidden relative">
+            <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h3 className="text-[15px] font-extrabold text-[#1e1b32] tracking-tight">Task Board</h3>
-                    <p className="text-[11px] text-[#a09cb5] font-medium mt-0.5">Click a task to move it forward</p>
+                    <h3 className="text-xl font-extrabold text-[#1e1b32] tracking-tight">Assigned Tasks</h3>
+                    <p className="text-[13px] text-[#6b6490] font-medium mt-1">Real-time task synchronization from doctors</p>
                 </div>
-                <span className="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-lg">
-                    {tasks.pending.length + tasks.inProgress.length} active
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[12px] font-bold text-[#1e1b32] bg-white/50 px-3 py-1 rounded-full border border-white/20">
+                        Live Sync
+                    </span>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {Object.entries(columnConfig).map(([colKey, col]) => (
-                    <div key={colKey} className="flex flex-col gap-2">
+                    <div key={colKey} className="flex flex-col gap-4">
                         {/* Column Header */}
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-2 h-2 rounded-full ${col.accent}`} />
-                            <span className="text-[12px] font-bold text-[#1e1b32] uppercase tracking-wider">{col.label}</span>
-                            <span className="text-[10px] font-bold text-[#a09cb5] bg-white/50 px-1.5 py-0.5 rounded-md ml-auto">{tasks[colKey].length}</span>
+                        <div className="flex items-center gap-3 px-1">
+                            <div className={`w-2.5 h-2.5 rounded-full ${col.accent} shadow-sm`} />
+                            <span className="text-[14px] font-extrabold text-[#1e1b32] uppercase tracking-widest">{col.label}</span>
+                            <span className="text-[12px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-lg ml-auto border border-violet-100/50">
+                                {tasksByStatus[colKey].length}
+                            </span>
                         </div>
 
-                        {/* Tasks */}
-                        <div className="flex flex-col gap-2 min-h-[120px]">
-                            {tasks[colKey].map((task) => (
+                        {/* Tasks Container */}
+                        <div className="flex flex-col gap-3 min-h-[400px] p-2 rounded-2xl bg-slate-50/30 border border-slate-100/50">
+                            {tasksByStatus[colKey].map((task) => (
                                 <div
                                     key={task.id}
-                                    onClick={() => moveTask(colKey, task.id)}
-                                    className={`group p-3 rounded-xl bg-white/40 border border-white/25 transition-all duration-300 ${col.next ? 'cursor-pointer hover:bg-white/70 hover:shadow-sm hover:-translate-y-0.5' : 'opacity-70'}`}
+                                    className={`group p-4 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:border-violet-100 ${col.next ? 'cursor-default' : 'opacity-80'}`}
                                 >
-                                    <div className="flex items-start justify-between mb-2">
-                                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${priorityStyles[task.priority]}`}>{task.priority}</span>
-                                        {col.next && <FiArrowRight className="w-3 h-3 text-[#a09cb5] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300" />}
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${priorityStyles[task.priority] || priorityStyles.Medium}`}>
+                                            {task.priority}
+                                        </div>
+                                        <div className="text-[11px] text-[#a09cb5] font-bold flex items-center gap-1">
+                                            <FiClock className="w-3 h-3" />
+                                            {task.time}
+                                        </div>
                                     </div>
-                                    <div className="text-[12px] font-bold text-[#1e1b32] mb-0.5 leading-tight">{task.task}</div>
-                                    <div className="text-[11px] text-[#6b6490] font-medium mb-1.5">{task.patient} · Rm {task.room}</div>
-                                    <div className="flex items-center gap-1 text-[#a09cb5]">
-                                        <FiClock className="w-3 h-3" />
-                                        <span className="text-[10px] font-semibold">{task.time}</span>
+
+                                    <div className="text-[14px] font-bold text-[#1e1b32] mb-1 leading-tight group-hover:text-violet-700 transition-colors">
+                                        {task.description || task.task}
                                     </div>
+
+                                    <div className="text-[12px] text-[#6b6490] font-semibold mb-4 flex items-center gap-2">
+                                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px]">
+                                            {task.patientName ? task.patientName.charAt(0) : 'P'}
+                                        </div>
+                                        {task.patientName || task.patient}
+                                    </div>
+
+                                    {col.next && (
+                                        <button
+                                            onClick={() => moveTask(task.id, col.next)}
+                                            className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-slate-50 text-[#1e1b32] font-bold text-[12px] hover:bg-violet-600 hover:text-white transition-all duration-300 active:scale-95 border border-slate-100 group/btn"
+                                        >
+                                            {colKey === 'pending' ? 'Start Task' : 'Complete Task'}
+                                            <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" />
+                                        </button>
+                                    )}
+
+                                    {colKey === 'completed' && (
+                                        <div className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-[12px] border border-emerald-100">
+                                            <FiCheckCircle className="w-3.5 h-3.5" />
+                                            Done
+                                        </div>
+                                    )}
                                 </div>
                             ))}
-                            {tasks[colKey].length === 0 && (
-                                <div className="flex items-center justify-center h-20 rounded-xl border border-dashed border-white/30 text-[11px] text-[#a09cb5] font-medium">
-                                    No tasks
+
+                            {tasksByStatus[colKey].length === 0 && (
+                                <div className="flex flex-col items-center justify-center h-32 rounded-2xl border-2 border-dashed border-slate-200 text-slate-300 gap-2">
+                                    <div className="w-8 h-8 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center opacity-50">
+                                        {getStatusIcon(colKey)}
+                                    </div>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest opacity-50">Empty</span>
                                 </div>
                             )}
                         </div>

@@ -3,19 +3,20 @@ import {
     FiGrid, FiUsers, FiCalendar, FiFileText, FiSettings,
     FiLogOut, FiChevronLeft, FiChevronRight, FiHeart, FiBarChart2
 } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const menuItems = [
-    { icon: FiGrid, label: 'Dashboard', active: true },
-    { icon: FiUsers, label: 'Patients' },
-    { icon: FiCalendar, label: 'Appointments' },
-    { icon: FiBarChart2, label: 'Analytics' },
-    { icon: FiFileText, label: 'Reports' },
-    { icon: FiSettings, label: 'Settings' },
+    { icon: FiGrid, label: 'Dashboard', path: '/doctor' },
+    { icon: FiUsers, label: 'Patients', path: '/doctor/patients' },
+    { icon: FiCalendar, label: 'Appointments', path: '/doctor/appointments' },
+    { icon: FiBarChart2, label: 'Analytics', path: '/doctor/analytics' },
+    { icon: FiFileText, label: 'Reports', path: '/doctor/reports' },
+    { icon: FiSettings, label: 'Settings', path: '/doctor/settings' },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
     const navigate = useNavigate();
+    const location = useLocation();
 
     return (
         <aside className={`${collapsed ? 'w-[80px]' : 'w-[260px]'} h-screen sticky top-0 flex flex-col glass-strong border-r border-white/20 transition-all duration-500 ease-out z-50 shrink-0`}>
@@ -29,18 +30,22 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
             {/* Menu */}
             <nav className="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
-                {menuItems.map((item, i) => (
-                    <button
-                        key={i}
-                        className={`group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 w-full text-left ${item.active
+                {menuItems.map((item, i) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                        <button
+                            key={i}
+                            onClick={() => navigate(item.path)}
+                            className={`group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 w-full text-left ${isActive
                                 ? 'bg-gradient-to-r from-violet-500/15 to-indigo-500/10 text-violet-700 shadow-sm'
                                 : 'text-[#6b6490] hover:bg-white/50 hover:text-[#1e1b32]'
-                            } ${collapsed ? 'justify-center' : ''}`}
-                    >
-                        <item.icon className={`w-5 h-5 stroke-[1.5] shrink-0 transition-transform duration-300 ${item.active ? '' : 'group-hover:scale-110'}`} />
-                        {!collapsed && <span className="text-[14px] font-semibold whitespace-nowrap">{item.label}</span>}
-                    </button>
-                ))}
+                                } ${collapsed ? 'justify-center' : ''}`}
+                        >
+                            <item.icon className={`w-5 h-5 stroke-[1.5] shrink-0 transition-transform duration-300 ${isActive ? '' : 'group-hover:scale-110'}`} />
+                            {!collapsed && <span className="text-[14px] font-semibold whitespace-nowrap">{item.label}</span>}
+                        </button>
+                    );
+                })}
             </nav>
 
             {/* Logout */}
