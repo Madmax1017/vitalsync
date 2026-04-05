@@ -64,3 +64,4 @@ const sql = globalThis.__postgresSql ?? createSql();
 globalThis.__postgresSql = sql;
 
 export { sql };
+export default sql;

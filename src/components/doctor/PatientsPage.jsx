@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { FiSearch, FiSliders, FiPlus, FiMoreVertical, FiActivity, FiUser, FiMapPin, FiClock } from 'react-icons/fi';
 import Sidebar from '../dashboard/Sidebar';
@@ -5,86 +6,62 @@ import TopBar from '../dashboard/TopBar';
 import PatientDetailPanel from './PatientDetailPanel';
 import gsap from 'gsap';
 
-const patientsData = [
-    {
-        id: 1,
-        name: "John Doe",
-        age: 45,
-        condition: "Hypertension",
-        room: "A-101",
-        status: "Stable",
-        vitals: { heartRate: "72 bpm", bp: "120/80", temp: "98.6°F" },
-        medications: ["Lisinopril 10mg", "Amlodipine 5mg"],
-        notes: "Patient is responding well to treatment. Continue monitoring BP."
-    },
-    {
-        id: 2,
-        name: "Sarah Jenkins",
-        age: 32,
-        condition: "Post-Op Recovery",
-        room: "B-204",
-        status: "Recovering",
-        vitals: { heartRate: "85 bpm", bp: "110/75", temp: "99.1°F" },
-        medications: ["Ibuprofen 400mg", "Cefazolin 1g"],
-        notes: "Recent appendectomy. Wound looking clean. Pain is manageable."
-    },
-    {
-        id: 3,
-        name: "Robert Wilson",
-        age: 68,
-        condition: "Acute Heart Failure",
-        room: "ICU-02",
-        status: "Critical",
-        vitals: { heartRate: "102 bpm", bp: "90/60", temp: "97.8°F" },
-        medications: ["Furosemide 40mg IV", "Dopamine 5mcg/kg/min"],
-        notes: "Requires constant monitoring. Fluid restriction in place."
-    },
-    {
-        id: 4,
-        name: "Emily Davis",
-        age: 27,
-        condition: "Asthma Exacerbation",
-        room: "C-112",
-        status: "Stable",
-        vitals: { heartRate: "88 bpm", bp: "115/78", temp: "98.4°F" },
-        medications: ["Albuterol Nebulizer", "Prednisone 40mg"],
-        notes: "Wheezing improved. Plan to discharge if stable overnight."
-    },
-    {
-        id: 5,
-        name: "Michael Brown",
-        age: 55,
-        condition: "Type 2 Diabetes",
-        room: "A-105",
-        status: "Stable",
-        vitals: { heartRate: "76 bpm", bp: "130/85", temp: "98.2°F" },
-        medications: ["Metformin 1000mg", "Insulin Glargine 20 units"],
-        notes: "A1C is improving. Patient needs education on foot care."
-    },
-    {
-        id: 6,
-        name: "Linda Thompson",
-        age: 74,
-        condition: "Pneumonia",
-        room: "B-210",
-        status: "Recovering",
-        vitals: { heartRate: "92 bpm", bp: "118/72", temp: "100.2°F" },
-        medications: ["Ceftriaxone 1g", "Azithromycin 500mg"],
-        notes: "Fever is trending down. O2 saturation stable on 2L NC."
-    }
-];
+const defaultVitals = { heartRate: '—', bp: '—', temp: '—' };
+
+function normalizePatient(raw) {
+    const vitals =
+        raw.vitals && typeof raw.vitals === 'object' && !Array.isArray(raw.vitals)
+            ? { ...defaultVitals, ...raw.vitals }
+            : { ...defaultVitals };
+    return {
+        ...raw,
+        vitals,
+        medications: Array.isArray(raw.medications) ? raw.medications : [],
+        notes: raw.notes ?? '',
+    };
+}
 
 export default function PatientsPage() {
     const [collapsed, setCollapsed] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [patients, setPatients] = useState([]);
+    const [loadState, setLoadState] = useState({ status: 'loading', error: null });
 
     const cardsRef = useRef([]);
 
     useEffect(() => {
-        // Entrance animation for cards
-        gsap.fromTo(cardsRef.current,
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/patients');
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    throw new Error(json.error || 'Failed to load patients');
+                }
+                const list = (json.data || []).map(normalizePatient);
+                if (!cancelled) {
+                    setPatients(list);
+                    setLoadState({ status: 'ready', error: null });
+                }
+            } catch (e) {
+                if (!cancelled) {
+                    setLoadState({
+                        status: 'error',
+                        error: e instanceof Error ? e.message : 'Failed to load patients',
+                    });
+                }
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    useEffect(() => {
+        if (loadState.status !== 'ready') return;
+        const nodes = cardsRef.current.filter(Boolean);
+        if (!nodes.length) return;
+        gsap.fromTo(nodes,
             { opacity: 0, y: 30, scale: 0.95 },
             {
                 opacity: 1,
@@ -95,9 +72,9 @@ export default function PatientsPage() {
                 ease: "back.out(1.7)"
             }
         );
-    }, [searchQuery]);
+    }, [searchQuery, loadState.status, patients]);
 
-    const filteredPatients = patientsData.filter(p =>
+    const filteredPatients = patients.filter(p =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.room.toLowerCase().includes(searchQuery.toLowerCase())
@@ -155,6 +132,17 @@ export default function PatientsPage() {
                             </button>
                         </div>
                     </div>
+
+                    {loadState.status === 'loading' && (
+                        <p className="text-[#64748b] font-medium">Loading patients…</p>
+                    )}
+                    {loadState.status === 'error' && (
+                        <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-rose-800 text-sm">
+                            <p className="font-bold">Could not load patients from the database.</p>
+                            <p className="mt-1">{loadState.error}</p>
+                            <p className="mt-2 text-rose-700/90">Run <code className="rounded bg-white/60 px-1">sql/init-doctor-module.sql</code> in pgAdmin, then refresh.</p>
+                        </div>
+                    )}
 
                     {/* Patients Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
