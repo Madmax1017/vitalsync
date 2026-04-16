@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiChevronRight, FiAlertCircle, FiLoader } from 'react-icons/fi';
 import gsap from 'gsap';
 
-const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
+const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient, onSubmit }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,7 +28,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
         return () => ctx.revert();
     }, []);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -39,11 +39,24 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
 
         setLoading(true);
 
-        // Simulate fake authentication delay
-        setTimeout(() => {
-            setLoading(false);
+        try {
+            if (onSubmit) {
+                await onSubmit({ email, password });
+                navigate(rolePath);
+                return;
+            }
+
+            // Keep non-admin logins in demo mode.
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1200);
+            });
             navigate(rolePath);
-        }, 1500);
+        } catch (err) {
+            const message = err?.response?.data?.message || err?.message || 'Login failed. Please try again.';
+            setError(message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -113,7 +126,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-4 rounded-2xl border border-[#e5e7eb] bg-white/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all duration-300 font-medium text-[#111827] placeholder:text-••••••••"
+                                        className="w-full pl-11 pr-4 py-4 rounded-2xl border border-[#e5e7eb] bg-white/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all duration-300 font-medium text-[#111827] placeholder:text-[#9ca3af]"
                                         placeholder="••••••••"
                                     />
                                 </div>
@@ -141,7 +154,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                         {/* Footer */}
                         <div className="mt-8 text-center">
                             <p className="text-[#6b7280] text-sm">
-                                Use dummy credentials to access the dashboard.
+                                {onSubmit ? 'Sign in with your admin credentials.' : 'Use dummy credentials to access the dashboard.'}
                             </p>
                         </div>
                     </div>

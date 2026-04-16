@@ -7,6 +7,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import DoctorLogin from './components/auth/DoctorLogin';
 import NurseLogin from './components/auth/NurseLogin';
 import AdminLogin from './components/auth/AdminLogin';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -16,7 +17,14 @@ function App() {
         <Route path="/doctor" element={<DoctorDashboard />} />
         <Route path="/doctor/patients" element={<PatientsPage />} />
         <Route path="/nurse" element={<NurseDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+          path="/admin"
+          element={(
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          )}
+        />
         <Route path="/login/doctor" element={<DoctorLogin />} />
         <Route path="/login/nurse" element={<NurseLogin />} />
         <Route path="/login/admin" element={<AdminLogin />} />
