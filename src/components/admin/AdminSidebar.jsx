@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const menuItems = [
     { icon: FiGrid, label: 'Dashboard', path: '/admin' },
     { icon: FiBriefcase, label: 'Staff Management', path: '#' },
-    { icon: FiUsers, label: 'Patients', path: '#' },
+    { icon: FiUsers, label: 'Appointments', path: '/admin' },
     { icon: FiFileText, label: 'Reports', path: '#' },
     { icon: FiBarChart2, label: 'Analytics', path: '#' },
     { icon: FiSettings, label: 'Settings', path: '#' },

@@ -1,97 +1,86 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSearch, FiSliders, FiPlus, FiMoreVertical, FiActivity, FiUser, FiMapPin, FiClock } from 'react-icons/fi';
+import { FiSearch, FiSliders, FiCalendar, FiClock, FiUser, FiFileText, FiMoreVertical } from 'react-icons/fi';
 import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
-import PatientDetailPanel from './PatientDetailPanel';
 import gsap from 'gsap';
 import { supabase } from '../../supabaseClient';
 import { FiLoader, FiInbox } from 'react-icons/fi';
 
-// Static data removed
-
-export default function PatientsPage() {
+export default function AppointmentsPage() {
     const [collapsed, setCollapsed] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedPatient, setSelectedPatient] = useState(null);
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [patients, setPatients] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const cardsRef = useRef([]);
 
-    const fetchPatients = async () => {
+    const userEmail = localStorage.getItem('userEmail') || '';
+
+    const fetchAppointments = async () => {
         const { data, error } = await supabase
-            .from('patients')
+            .from('appointments')
             .select('*')
-            .order('created_at', { ascending: false });
+            .eq('doctor_email', userEmail)
+            .order('date', { ascending: true });
 
         if (error) {
-            console.error('Error fetching patients:', error);
+            console.error('Error fetching appointments:', error);
         } else {
-            setPatients(data || []);
+            setAppointments(data || []);
         }
         setLoading(false);
     };
 
     useEffect(() => {
-        fetchPatients();
+        fetchAppointments();
 
         const subscription = supabase
-            .channel('patients-page')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchPatients)
+            .channel('doctor-appointments-page')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchAppointments)
             .subscribe();
 
-        return () => {
-            supabase.removeChannel(subscription);
-        };
+        return () => supabase.removeChannel(subscription);
     }, []);
 
     useEffect(() => {
-        // Entrance animation for cards
         if (cardsRef.current.length > 0) {
             gsap.fromTo(cardsRef.current,
                 { opacity: 0, y: 30, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "back.out(1.7)"
-                }
+                { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: 'back.out(1.7)' }
             );
         }
-    }, [searchQuery, patients]);
+    }, [searchQuery, appointments]);
 
-    const filteredPatients = patients.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.room.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredAppointments = appointments.filter(a =>
+        a.patient_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (a.notes || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (a.status || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const getStatusStyles = (status) => {
         switch (status?.toLowerCase()) {
-            case 'stable': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-            case 'critical': return 'bg-rose-50 text-rose-600 border-rose-100';
-            case 'recovering': return 'bg-amber-50 text-amber-600 border-amber-100';
-            case 'observing': return 'bg-amber-50 text-amber-600 border-amber-100';
+            case 'scheduled': return 'bg-blue-50 text-blue-600 border-blue-100';
+            case 'confirmed': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+            case 'in progress': return 'bg-amber-50 text-amber-600 border-amber-100';
+            case 'completed': return 'bg-violet-50 text-violet-600 border-violet-100';
+            case 'cancelled': return 'bg-rose-50 text-rose-600 border-rose-100';
             default: return 'bg-gray-50 text-gray-600 border-gray-100';
         }
     };
 
-    const handlePatientClick = (patient) => {
-        setSelectedPatient(patient);
-        setIsPanelOpen(true);
+    const formatTime = (time) => {
+        if (!time) return '';
+        const [h, m] = time.split(':');
+        const hour = parseInt(h);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${m} ${ampm}`;
     };
-
-    console.log("Patients:", patients);
 
     return (
         <div className="flex min-h-screen w-full bg-[#f8fafc]">
-            {/* Ambient bg orbs */}
             <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[10%] right-[15%] w-[500px] h-[500px] bg-violet-400/5 rounded-full blur-[140px]" />
-                <div className="absolute bottom-[10%] left-[5%] w-[600px] h-[600px] bg-indigo-400/5 rounded-full blur-[140px]" />
+                <div className="absolute top-[10%] right-[15%] w-[500px] h-[500px] bg-blue-400/5 rounded-full blur-[140px]" />
+                <div className="absolute bottom-[10%] left-[5%] w-[600px] h-[600px] bg-cyan-400/5 rounded-full blur-[140px]" />
             </div>
 
             <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -100,60 +89,57 @@ export default function PatientsPage() {
                 <div className="p-4 md:p-6 lg:p-8 space-y-8">
                     <TopBar />
 
-                    {/* Header Section */}
+                    {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div className="space-y-1">
-                            <h1 className="text-3xl font-extrabold tracking-tight text-[#1e1b32]">Patients</h1>
-                            <p className="text-[#64748b] font-medium">Manage and view all assigned patients</p>
+                            <h1 className="text-3xl font-extrabold tracking-tight text-[#1e1b32]">Appointments</h1>
+                            <p className="text-[#64748b] font-medium">View and manage your scheduled appointments</p>
                         </div>
-
-                        {/* Search & Actions */}
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <div className="relative flex-1 md:w-64">
                                 <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] w-4.5 h-4.5" />
                                 <input
                                     type="text"
-                                    placeholder="Search patients..."
+                                    placeholder="Search appointments..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/40 glass bg-white/40 focus:bg-white/80 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/50 outline-none transition-all duration-300 text-[14px] font-medium placeholder:text-[#94a3b8]"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/40 glass bg-white/40 focus:bg-white/80 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none transition-all duration-300 text-[14px] font-medium placeholder:text-[#94a3b8]"
                                 />
                             </div>
-                            <button className="p-2.5 rounded-xl border border-white/40 glass bg-white/40 text-[#64748b] hover:text-violet-600 hover:bg-white/80 transition-all duration-300 shadow-sm">
+                            <button className="p-2.5 rounded-xl border border-white/40 glass bg-white/40 text-[#64748b] hover:text-blue-600 hover:bg-white/80 transition-all duration-300 shadow-sm">
                                 <FiSliders className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
 
-                    {/* Patients Grid */}
+                    {/* Appointments Grid */}
                     <div className="min-h-[400px]">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-20 text-[#a09cb5]">
                                 <FiLoader className="w-12 h-12 animate-spin mb-4" />
-                                <span className="text-[14px] font-bold uppercase tracking-widest">Synchronizing Records...</span>
+                                <span className="text-[14px] font-bold uppercase tracking-widest">Loading Appointments...</span>
                             </div>
                         ) : (
                             <div className="w-full">
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    {patients && patients.length > 0 ? (
-                                        filteredPatients.map((patient, index) => (
+                                    {appointments && appointments.length > 0 ? (
+                                        filteredAppointments.map((apt, index) => (
                                             <div
-                                                key={patient.id}
+                                                key={apt.id}
                                                 ref={el => cardsRef.current[index] = el}
-                                                onClick={() => handlePatientClick(patient)}
-                                                className="group relative bg-white/60 border border-white/40 backdrop-blur-md rounded-2xl p-5 hover:shadow-2xl hover:shadow-violet-500/5 hover:-translate-y-1.5 transition-all duration-500 cursor-pointer overflow-hidden"
+                                                className="group relative bg-white/60 border border-white/40 backdrop-blur-md rounded-2xl p-5 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1.5 transition-all duration-500 cursor-pointer overflow-hidden"
                                             >
-                                                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/0 via-violet-500/0 to-violet-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                                 <div className="relative z-10 space-y-4">
                                                     <div className="flex justify-between items-start">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center text-violet-600 shadow-inner">
-                                                                <FiUser className="w-6 h-6" />
+                                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-blue-600 shadow-inner">
+                                                                <FiCalendar className="w-6 h-6" />
                                                             </div>
                                                             <div>
-                                                                <h3 className="font-bold text-[#1e1b32] group-hover:text-violet-700 transition-colors duration-300">{patient.name}</h3>
-                                                                <p className="text-[13px] text-[#64748b] font-medium">{patient.age} years old</p>
+                                                                <h3 className="font-bold text-[#1e1b32] group-hover:text-blue-700 transition-colors duration-300">{apt.patient_name}</h3>
+                                                                <p className="text-[13px] text-[#64748b] font-medium">{apt.date}</p>
                                                             </div>
                                                         </div>
                                                         <button className="text-[#94a3b8] hover:text-[#1e1b32] p-1 transition-colors">
@@ -164,46 +150,46 @@ export default function PatientsPage() {
                                                     <div className="grid grid-cols-2 gap-4 py-2">
                                                         <div className="space-y-1">
                                                             <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#94a3b8] uppercase tracking-wider">
-                                                                <FiActivity className="w-3.5 h-3.5" />
-                                                                Condition
+                                                                <FiClock className="w-3.5 h-3.5" />
+                                                                Time
                                                             </div>
-                                                            <div className="text-[14px] font-semibold text-[#334155] truncate">{patient.condition}</div>
+                                                            <div className="text-[14px] font-semibold text-[#334155]">{formatTime(apt.time)}</div>
                                                         </div>
                                                         <div className="space-y-1">
                                                             <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#94a3b8] uppercase tracking-wider">
-                                                                <FiMapPin className="w-3.5 h-3.5" />
-                                                                Room
+                                                                <FiFileText className="w-3.5 h-3.5" />
+                                                                Notes
                                                             </div>
-                                                            <div className="text-[14px] font-semibold text-[#334155]">{patient.room}</div>
+                                                            <div className="text-[14px] font-semibold text-[#334155] truncate">{apt.notes || '—'}</div>
                                                         </div>
                                                     </div>
 
                                                     <div className="flex items-center justify-between pt-2 border-t border-slate-100/50">
-                                                        <div className={`px-3 py-1 rounded-full text-[12px] font-bold border ${getStatusStyles(patient.status)}`}>
-                                                            {patient.status}
+                                                        <div className={`px-3 py-1 rounded-full text-[12px] font-bold border ${getStatusStyles(apt.status)}`}>
+                                                            {apt.status}
                                                         </div>
                                                         <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#64748b]">
                                                             <FiClock className="w-3.5 h-3.5" />
-                                                            Updated just now
+                                                            {apt.date}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="col-span-1 md:col-span-2 xl:grid-cols-3 flex flex-col items-center justify-center py-20 text-center space-y-4">
+                                        <div className="col-span-1 md:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-20 text-center space-y-4">
                                             <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                                                 <FiInbox className="w-10 h-10" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold text-[#1e1b32]">No patients found</h3>
-                                                <p className="text-[#64748b]">Start by adding patients through the Admin panel</p>
+                                                <h3 className="text-xl font-bold text-[#1e1b32]">No appointments found</h3>
+                                                <p className="text-[#64748b]">Appointments will appear here when assigned by Admin</p>
                                             </div>
                                         </div>
                                     )}
                                 </div>
 
-                                {patients.length > 0 && filteredPatients.length === 0 && (
+                                {appointments.length > 0 && filteredAppointments.length === 0 && (
                                     <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
                                         <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                                             <FiSearch className="w-10 h-10" />
@@ -219,13 +205,6 @@ export default function PatientsPage() {
                     </div>
                 </div>
             </div>
-
-            {/* Patient Detail Side Panel */}
-            <PatientDetailPanel
-                isOpen={isPanelOpen}
-                onClose={() => setIsPanelOpen(false)}
-                patient={selectedPatient}
-            />
         </div>
     );
 }

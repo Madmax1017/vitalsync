@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FiMail, FiLock, FiChevronRight, FiAlertCircle, FiLoader } from 'react-icons/fi';
 import gsap from 'gsap';
+import { supabase } from '../../supabaseClient';
 
 const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
     const [email, setEmail] = useState('');
@@ -28,7 +29,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
         return () => ctx.revert();
     }, []);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -39,11 +40,47 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
 
         setLoading(true);
 
-        // Simulate fake authentication delay
-        setTimeout(() => {
+        try {
+            // 1. Get user from Supabase
+            const { data: user, error: supabaseError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            if (supabaseError) {
+                // Supabase error codes: PGRST116 is "JSON object requested, but no rows were returned"
+                if (supabaseError.code === 'PGRST116') {
+                    setError('User not found');
+                } else {
+                    console.error('Supabase error:', supabaseError.message);
+                    setError('Authentication service error');
+                }
+                return;
+            }
+
+            if (user) {
+                // 2. Validate password
+                if (user.password === password) {
+                    // Success! Store user info
+                    localStorage.setItem('user', JSON.stringify({
+                        name: user.name,
+                        role: user.role
+                    }));
+                    localStorage.setItem('userEmail', user.email);
+
+                    // Redirect based on role
+                    navigate(`/${user.role}`);
+                } else {
+                    setError('Invalid password');
+                }
+            }
+        } catch (err) {
+            console.error('Unexpected login error:', err);
+            setError('An error occurred during login');
+        } finally {
             setLoading(false);
-            navigate(rolePath);
-        }, 1500);
+        }
     };
 
     return (
@@ -95,7 +132,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full pl-11 pr-4 py-4 rounded-2xl border border-[#e5e7eb] bg-white/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all duration-300 font-medium text-[#111827] placeholder:text-[#9ca3af]"
-                                        placeholder="doctor@vitalsync.com"
+                                        placeholder="user@vitalsync.com"
                                     />
                                 </div>
                             </div>
@@ -139,9 +176,9 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                         </form>
 
                         {/* Footer */}
-                        <div className="mt-8 text-center">
-                            <p className="text-[#6b7280] text-sm">
-                                Use dummy credentials to access the dashboard.
+                        <div className="mt-8 text-center space-y-3">
+                            <p className="text-[#9ca3af] text-xs">
+                                Access your secure healthcare dashboard
                             </p>
                         </div>
                     </div>

@@ -1,50 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiUsers, FiUserCheck, FiActivity, FiCalendar, FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi';
-
-const stats = [
-    {
-        title: 'Total Patients',
-        value: '12,842',
-        change: '+12.5%',
-        isUp: true,
-        icon: FiUsers,
-        gradient: 'from-violet-600 to-indigo-600',
-        bg: 'bg-violet-50',
-        color: 'text-violet-600'
-    },
-    {
-        title: 'Active Staff',
-        value: '348',
-        change: '+4.2%',
-        isUp: true,
-        icon: FiUserCheck,
-        gradient: 'from-indigo-600 to-blue-600',
-        bg: 'bg-indigo-50',
-        color: 'text-indigo-600'
-    },
-    {
-        title: 'Bed Occupancy',
-        value: '86%',
-        change: '-2.1%',
-        isUp: false,
-        icon: FiActivity,
-        gradient: 'from-blue-600 to-cyan-600',
-        bg: 'bg-blue-50',
-        color: 'text-blue-600'
-    },
-    {
-        title: 'Today Appointments',
-        value: '156',
-        change: '+8.7%',
-        isUp: true,
-        icon: FiCalendar,
-        gradient: 'from-cyan-600 to-emerald-600',
-        bg: 'bg-cyan-50',
-        color: 'text-cyan-600'
-    }
-];
+import { supabase } from '../../supabaseClient';
 
 export default function AdminStatsCards() {
+    const [patientCount, setPatientCount] = useState('—');
+    const [appointmentCount, setAppointmentCount] = useState('—');
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            const { count: pCount } = await supabase
+                .from('patients')
+                .select('*', { count: 'exact', head: true });
+            setPatientCount(pCount ?? 0);
+
+            const { count: aCount } = await supabase
+                .from('appointments')
+                .select('*', { count: 'exact', head: true });
+            setAppointmentCount(aCount ?? 0);
+        };
+
+        fetchCounts();
+
+        const sub = supabase
+            .channel('admin-stats')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchCounts)
+            .subscribe();
+
+        return () => supabase.removeChannel(sub);
+    }, []);
+
+    const stats = [
+        {
+            title: 'Total Patients',
+            value: patientCount,
+            change: 'Live count',
+            isUp: true,
+            icon: FiUsers,
+            gradient: 'from-violet-600 to-indigo-600',
+            bg: 'bg-violet-50',
+            color: 'text-violet-600'
+        },
+        {
+            title: 'Active Staff',
+            value: '348',
+            change: '+4.2%',
+            isUp: true,
+            icon: FiUserCheck,
+            gradient: 'from-indigo-600 to-blue-600',
+            bg: 'bg-indigo-50',
+            color: 'text-indigo-600'
+        },
+        {
+            title: 'Bed Occupancy',
+            value: '86%',
+            change: '-2.1%',
+            isUp: false,
+            icon: FiActivity,
+            gradient: 'from-blue-600 to-cyan-600',
+            bg: 'bg-blue-50',
+            color: 'text-blue-600'
+        },
+        {
+            title: 'Total Appointments',
+            value: appointmentCount,
+            change: 'Live count',
+            isUp: true,
+            icon: FiCalendar,
+            gradient: 'from-cyan-600 to-emerald-600',
+            bg: 'bg-cyan-50',
+            color: 'text-cyan-600'
+        }
+    ];
+
     return (
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, i) => (

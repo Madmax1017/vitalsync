@@ -1,46 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiUsers, FiCalendar, FiAlertTriangle, FiFileText } from 'react-icons/fi';
-
-const stats = [
-    {
-        title: 'Patients Today',
-        value: '24',
-        change: '+3 from yesterday',
-        icon: FiUsers,
-        gradient: 'from-violet-500 to-indigo-500',
-        bgAccent: 'bg-violet-100',
-        textAccent: 'text-violet-600',
-    },
-    {
-        title: 'Appointments',
-        value: '8',
-        change: '2 upcoming',
-        icon: FiCalendar,
-        gradient: 'from-blue-500 to-cyan-500',
-        bgAccent: 'bg-blue-100',
-        textAccent: 'text-blue-600',
-    },
-    {
-        title: 'Critical Cases',
-        value: '3',
-        change: '1 needs review',
-        icon: FiAlertTriangle,
-        gradient: 'from-rose-400 to-pink-500',
-        bgAccent: 'bg-rose-100',
-        textAccent: 'text-rose-600',
-    },
-    {
-        title: 'Reports',
-        value: '12',
-        change: '5 pending',
-        icon: FiFileText,
-        gradient: 'from-emerald-400 to-teal-500',
-        bgAccent: 'bg-emerald-100',
-        textAccent: 'text-emerald-600',
-    },
-];
+import { supabase } from '../../supabaseClient';
 
 export default function StatsCards() {
+    const [patientCount, setPatientCount] = useState('—');
+    const [appointmentCount, setAppointmentCount] = useState('—');
+
+    const userEmail = localStorage.getItem('userEmail') || '';
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            const { count: pCount } = await supabase
+                .from('patients')
+                .select('*', { count: 'exact', head: true });
+            setPatientCount(pCount ?? 0);
+
+            const { count: aCount } = await supabase
+                .from('appointments')
+                .select('*', { count: 'exact', head: true })
+                .eq('doctor_email', userEmail);
+            setAppointmentCount(aCount ?? 0);
+        };
+
+        fetchCounts();
+
+        const sub = supabase
+            .channel('doctor-stats')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchCounts)
+            .subscribe();
+
+        return () => supabase.removeChannel(sub);
+    }, []);
+
+    const stats = [
+        {
+            title: 'Total Patients',
+            value: patientCount,
+            change: 'Live count',
+            icon: FiUsers,
+            gradient: 'from-violet-500 to-indigo-500',
+            bgAccent: 'bg-violet-100',
+            textAccent: 'text-violet-600',
+        },
+        {
+            title: 'My Appointments',
+            value: appointmentCount,
+            change: 'Assigned to you',
+            icon: FiCalendar,
+            gradient: 'from-blue-500 to-cyan-500',
+            bgAccent: 'bg-blue-100',
+            textAccent: 'text-blue-600',
+        },
+        {
+            title: 'Critical Cases',
+            value: '3',
+            change: '1 needs review',
+            icon: FiAlertTriangle,
+            gradient: 'from-rose-400 to-pink-500',
+            bgAccent: 'bg-rose-100',
+            textAccent: 'text-rose-600',
+        },
+        {
+            title: 'Reports',
+            value: '12',
+            change: '5 pending',
+            icon: FiFileText,
+            gradient: 'from-emerald-400 to-teal-500',
+            bgAccent: 'bg-emerald-100',
+            textAccent: 'text-emerald-600',
+        },
+    ];
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, i) => (

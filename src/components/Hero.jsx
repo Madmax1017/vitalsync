@@ -2,6 +2,7 @@ import React, { useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import { Canvas } from '@react-three/fiber';
 import ThreeDModel from './ThreeDModel';
+import {OrbitControls} from "@react-three/drei";
 
 export default function Hero() {
     const heroRef = useRef(null);
@@ -117,6 +118,7 @@ export default function Hero() {
                     }>
                         <Canvas camera={{ position: [0, 0, 5], fov: 45 }} className="w-full h-full">
                             <ThreeDModel />
+                            <OrbitControls />
                         </Canvas>
                     </Suspense>
                 </div>

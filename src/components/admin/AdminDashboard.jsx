@@ -7,6 +7,8 @@ import AdminChartsSection from './AdminChartsSection';
 import StaffTable from './StaffTable';
 import ActivityFeed from './ActivityFeed';
 import Admin3DWidget from './Admin3DWidget';
+import AddPatientForm from './AddPatientForm';
+import AddAppointmentForm from './AddAppointmentForm';
 
 export default function AdminDashboard() {
     const [collapsed, setCollapsed] = useState(false);
@@ -71,6 +73,14 @@ export default function AdminDashboard() {
 
                 <div className="admin-fade-in">
                     <AdminChartsSection />
+                </div>
+
+                <div className="admin-fade-in mb-10">
+                    <AddPatientForm />
+                </div>
+
+                <div className="admin-fade-in mb-10">
+                    <AddAppointmentForm />
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-10">
