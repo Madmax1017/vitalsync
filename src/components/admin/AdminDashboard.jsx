@@ -4,11 +4,7 @@ import AdminSidebar from './AdminSidebar';
 import AdminTopBar from './AdminTopBar';
 import AdminStatsCards from './AdminStatsCards';
 import AdminChartsSection from './AdminChartsSection';
-import StaffTable from './StaffTable';
-import ActivityFeed from './ActivityFeed';
 import Admin3DWidget from './Admin3DWidget';
-import AddPatientForm from './AddPatientForm';
-import AddAppointmentForm from './AddAppointmentForm';
 
 export default function AdminDashboard() {
     const [collapsed, setCollapsed] = useState(false);
@@ -75,22 +71,7 @@ export default function AdminDashboard() {
                     <AdminChartsSection />
                 </div>
 
-                <div className="admin-fade-in mb-10">
-                    <AddPatientForm />
-                </div>
 
-                <div className="admin-fade-in mb-10">
-                    <AddAppointmentForm />
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-10">
-                    <div className="xl:col-span-8 admin-fade-in">
-                        <StaffTable />
-                    </div>
-                    <div className="xl:col-span-4 admin-fade-in">
-                        <ActivityFeed />
-                    </div>
-                </div>
 
                 {/* Footer Quote / Hint */}
                 <div className="mt-auto pt-10 pb-4 border-t border-white/20 text-center">
