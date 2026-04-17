@@ -9,6 +9,7 @@ const DoctorLogin = () => {
             rolePath="/doctor"
             icon={FiClipboard}
             gradient="from-violet-600 to-indigo-600"
+            expectedRole="doctor"
         />
     );
 };

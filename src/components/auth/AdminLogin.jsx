@@ -9,6 +9,7 @@ const AdminLogin = () => {
             rolePath="/admin"
             icon={FiShield}
             gradient="from-indigo-600 to-purple-700"
+            expectedRole="admin"
         />
     );
 };
