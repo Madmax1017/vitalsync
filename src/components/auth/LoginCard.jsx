@@ -4,7 +4,7 @@ import { FiMail, FiLock, FiChevronRight, FiAlertCircle, FiLoader } from 'react-i
 import gsap from 'gsap';
 import { supabase } from '../../supabaseClient';
 
-const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
+const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient, expectedRole }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -62,6 +62,14 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
             if (user) {
                 // 2. Validate password
                 if (user.password === password) {
+                    const normalizedUserRole = String(user.role || '').toLowerCase();
+                    const normalizedExpectedRole = expectedRole ? expectedRole.toLowerCase() : null;
+
+                    if (normalizedExpectedRole && normalizedUserRole !== normalizedExpectedRole) {
+                        setError(`This account does not have ${roleTitle} access`);
+                        return;
+                    }
+
                     // Success! Store user info
                     localStorage.setItem('user', JSON.stringify({
                         name: user.name,
@@ -70,7 +78,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                     localStorage.setItem('userEmail', user.email);
 
                     // Redirect based on role
-                    navigate(`/${user.role}`);
+                    navigate(rolePath || `/${normalizedUserRole}`);
                 } else {
                     setError('Invalid password');
                 }

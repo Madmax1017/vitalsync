@@ -8,6 +8,8 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import DoctorLogin from './components/auth/DoctorLogin';
 import NurseLogin from './components/auth/NurseLogin';
 import AdminLogin from './components/auth/AdminLogin';
+import PatientLogin from './components/auth/PatientLogin';
+import PatientPortal from './components/patient/PatientPortal';
 
 function App() {
   return (
@@ -19,9 +21,11 @@ function App() {
         <Route path="/doctor/appointments" element={<AppointmentsPage />} />
         <Route path="/nurse" element={<NurseDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/patient" element={<PatientPortal />} />
         <Route path="/login/doctor" element={<DoctorLogin />} />
         <Route path="/login/nurse" element={<NurseLogin />} />
         <Route path="/login/admin" element={<AdminLogin />} />
+        <Route path="/login/patient" element={<PatientLogin />} />
       </Routes>
     </BrowserRouter>
   );

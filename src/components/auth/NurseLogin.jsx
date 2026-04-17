@@ -9,6 +9,7 @@ const NurseLogin = () => {
             rolePath="/nurse"
             icon={FiHeart}
             gradient="from-rose-500 to-pink-600"
+            expectedRole="nurse"
         />
     );
 };
