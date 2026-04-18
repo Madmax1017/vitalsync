@@ -34,7 +34,7 @@ export default function NurseNotesPage() {
         const { data, error } = await supabase
             .from('notes')
             .select('*')
-            .eq('nurse_email', nurseEmail)
+            .eq('created_by', nurseEmail)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -54,9 +54,9 @@ export default function NurseNotesPage() {
             .from('notes')
             .insert([
                 {
-                    nurse_email: nurseEmail,
+                    created_by: nurseEmail,
                     patient_name: patientName,
-                    note: noteText
+                    content: noteText
                 }
             ]);
 
@@ -159,7 +159,7 @@ export default function NurseNotesPage() {
                                             </div>
                                         </div>
                                         <p className="text-[#6b6490] text-[14px] leading-relaxed font-medium pl-[40px]">
-                                            {note.note}
+                                            {note.content}
                                         </p>
                                     </div>
                                 ))

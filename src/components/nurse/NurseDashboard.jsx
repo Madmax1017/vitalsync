@@ -18,7 +18,7 @@ function RecentNotes() {
             const { data } = await supabase
                 .from('notes')
                 .select('*')
-                .eq('nurse_email', nurseEmail)
+                .eq('created_by', nurseEmail)
                 .order('created_at', { ascending: false })
                 .limit(3);
 
@@ -56,7 +56,7 @@ function RecentNotes() {
                             </span>
                         </div>
                         <p className="text-[12px] text-[#6b6490] font-medium leading-relaxed pl-5 line-clamp-2">
-                            {note.note}
+                            {note.content}
                         </p>
                     </div>
                 ))}

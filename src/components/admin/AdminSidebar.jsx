@@ -50,7 +50,14 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
 
             {/* Logout */}
             <div className="px-3 pb-6 border-t border-white/15 pt-4">
-                <button className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[#6b6490] hover:bg-rose-50 hover:text-rose-600 transition-all duration-300 w-full font-bold ${collapsed ? 'justify-center' : ''}`}>
+                <button
+                    onClick={() => {
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('role');
+                        window.location.href = '/';
+                    }}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[#6b6490] hover:bg-rose-50 hover:text-rose-600 transition-all duration-300 w-full font-bold ${collapsed ? 'justify-center' : ''}`}
+                >
                     <FiLogOut className="w-5 h-5 stroke-[2] shrink-0" />
                     {!collapsed && <span className="text-[15px]">Logout</span>}
                 </button>

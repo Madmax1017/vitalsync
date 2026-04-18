@@ -1,19 +1,9 @@
 import React from 'react';
-import { FiSearch, FiBell, FiChevronDown } from 'react-icons/fi';
+import { FiBell, FiChevronDown } from 'react-icons/fi';
 
 export default function TopBar() {
     return (
-        <header className="w-full flex items-center justify-between gap-4 py-4 px-6 glass-strong rounded-2xl border border-white/20 shadow-sm">
-            {/* Search */}
-            <div className="flex items-center gap-3 bg-white/40 rounded-xl px-4 py-2.5 border border-white/30 flex-1 max-w-md transition-all duration-300 focus-within:bg-white/60 focus-within:shadow-sm focus-within:border-violet-200/50">
-                <FiSearch className="w-4.5 h-4.5 text-[#6b6490] shrink-0" />
-                <input
-                    type="text"
-                    placeholder="Search patients, records..."
-                    className="bg-transparent outline-none text-sm font-medium text-[#1e1b32] placeholder-[#a09cb5] w-full"
-                />
-            </div>
-
+        <header className="w-full flex items-center justify-end gap-4 py-4 px-6 glass-strong rounded-2xl border border-white/20 shadow-sm">
             {/* Right side */}
             <div className="flex items-center gap-3">
                 {/* Notification */}

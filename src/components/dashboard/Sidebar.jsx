@@ -51,7 +51,14 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
             {/* Logout */}
             <div className="px-3 pb-4 border-t border-white/15 pt-3">
-                <button className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[#6b6490] hover:bg-rose-50 hover:text-rose-500 transition-all duration-300 w-full ${collapsed ? 'justify-center' : ''}`}>
+                <button
+                    onClick={() => {
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('role');
+                        window.location.href = '/';
+                    }}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[#6b6490] hover:bg-rose-50 hover:text-rose-500 transition-all duration-300 w-full ${collapsed ? 'justify-center' : ''}`}
+                >
                     <FiLogOut className="w-5 h-5 stroke-[1.5] shrink-0" />
                     {!collapsed && <span className="text-[14px] font-semibold">Logout</span>}
                 </button>
