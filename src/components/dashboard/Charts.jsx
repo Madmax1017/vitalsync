@@ -1,39 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
 import {
-    AreaChart, Area, LineChart, Line,
-    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    BarChart, Bar, Cell
 } from 'recharts';
-
-const vitalsData = [
-    { time: '6AM', hr: 72, bp: 120 },
-    { time: '8AM', hr: 78, bp: 125 },
-    { time: '10AM', hr: 85, bp: 130 },
-    { time: '12PM', hr: 80, bp: 128 },
-    { time: '2PM', hr: 76, bp: 122 },
-    { time: '4PM', hr: 82, bp: 126 },
-    { time: '6PM', hr: 74, bp: 118 },
-];
-
-const appointmentsData = [
-    { day: 'Mon', count: 6 },
-    { day: 'Tue', count: 9 },
-    { day: 'Wed', count: 5 },
-    { day: 'Thu', count: 8 },
-    { day: 'Fri', count: 12 },
-    { day: 'Sat', count: 7 },
-    { day: 'Sun', count: 3 },
-];
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="glass-strong rounded-xl px-3 py-2 shadow-lg border border-white/30">
-                <p className="text-[11px] font-bold text-[#1e1b32] mb-0.5">{label}</p>
-                {payload.map((entry, i) => (
-                    <p key={i} className="text-[10px] font-semibold" style={{ color: entry.color }}>
-                        {entry.name}: {entry.value}
-                    </p>
-                ))}
+            <div className="bg-white rounded-2xl px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-50 relative overflow-hidden">
+                <p className="font-bold text-slate-800 text-[13px] mb-3">{label}</p>
+                <div className="space-y-2">
+                    {payload.map((pl, i) => (
+                        <div key={i} className="flex items-center justify-between gap-6">
+                            <span className="text-[13px] font-medium text-slate-500 capitalize flex items-center gap-2.5">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: pl.color }} />
+                                {pl.name}
+                            </span>
+                            <span className="font-bold text-[14px]" style={{ color: pl.color }}>
+                                {pl.value}
+                            </span>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -41,57 +30,124 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function Charts() {
+    const [data, setData] = useState([]);
+
+    const userEmail = localStorage.getItem('userEmail') || '';
+
+    useEffect(() => {
+        const fetchDailyData = async () => {
+            const today = new Date();
+            const daysArr = [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            // Initialize last 7 days
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                daysArr.push({
+                    dateStr: d.toISOString().split('T')[0],
+                    name: dayNames[d.getDay()],
+                    patients: 0,
+                    appointments: 0,
+                    tasks: 0
+                });
+            }
+
+            const [pRes, aRes, tRes] = await Promise.all([
+                supabase.from('patients').select('created_at'),
+                supabase.from('appointments').select('appointment_date').eq('doctor_email', userEmail),
+                supabase.from('tasks').select('created_at, status').eq('assigned_by', userEmail)
+            ]);
+
+            const processResults = (res, dateField, mappedField, condition = () => true) => {
+                if (res.data) {
+                    res.data.forEach(item => {
+                        if (item[dateField] && condition(item)) {
+                            const dateStr = item[dateField].split('T')[0];
+                            const dayMatch = daysArr.find(d => d.dateStr === dateStr);
+                            if (dayMatch) dayMatch[mappedField] += 1;
+                        }
+                    });
+                }
+            };
+
+            processResults(pRes, 'created_at', 'patients');
+            processResults(aRes, 'appointment_date', 'appointments');
+            processResults(tRes, 'created_at', 'tasks', item => item.status === 'completed');
+
+            setData(daysArr);
+        };
+
+        fetchDailyData();
+
+        const sub = supabase.channel('doctor-charts')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchDailyData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchDailyData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchDailyData)
+            .subscribe();
+
+        return () => supabase.removeChannel(sub);
+    }, [userEmail]);
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Vitals Line Chart */}
-            <div className="p-5 rounded-2xl glass overflow-hidden transition-all duration-500 hover:shadow-[0_16px_40px_-12px_rgba(124,58,237,0.1)]">
-                <div className="flex items-center justify-between mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Activity Overview */}
+            <div className="p-7 bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] hover:border-slate-200">
+                <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h3 className="text-[15px] font-extrabold text-[#1e1b32] tracking-tight">Patient Vitals</h3>
-                        <p className="text-[11px] text-[#a09cb5] font-medium mt-0.5">Heart rate & blood pressure trends</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1.5 text-[10px] font-semibold text-[#6b6490]"><span className="w-2 h-2 rounded-full bg-violet-500"></span>HR</span>
-                        <span className="flex items-center gap-1.5 text-[10px] font-semibold text-[#6b6490]"><span className="w-2 h-2 rounded-full bg-indigo-400"></span>BP</span>
+                        <h3 className="text-[18px] font-extrabold text-slate-800 tracking-tight">Daily Activity</h3>
+                        <p className="text-[13px] text-slate-500 font-medium mt-1">Patients and Appointments over last 7 days</p>
                     </div>
                 </div>
-                <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={vitalsData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,58,237,0.06)" />
-                        <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#a09cb5', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: '#a09cb5', fontWeight: 600 }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Line type="monotone" dataKey="hr" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 4, fill: '#8b5cf6', stroke: '#fff', strokeWidth: 2 }} name="Heart Rate" />
-                        <Line type="monotone" dataKey="bp" stroke="#818cf8" strokeWidth={2.5} dot={{ r: 4, fill: '#818cf8', stroke: '#fff', strokeWidth: 2 }} name="Blood Pressure" />
-                    </LineChart>
-                </ResponsiveContainer>
+                <div className="h-[280px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorPatients" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="colorAppts" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 500 }} dy={15} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 500 }} dx={-10} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f8fafc', strokeWidth: 2 }} />
+                            <Area type="monotone" dataKey="patients" name="Patients" stroke="#4f46e5" strokeWidth={3} strokeLinecap="round" fillOpacity={1} fill="url(#colorPatients)" activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5' }} animationDuration={1000} />
+                            <Area type="monotone" dataKey="appointments" name="Appointments" stroke="#0ea5e9" strokeWidth={3} strokeLinecap="round" fillOpacity={1} fill="url(#colorAppts)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0ea5e9' }} animationDuration={1000} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
-            {/* Appointments Area Chart */}
-            <div className="p-5 rounded-2xl glass overflow-hidden transition-all duration-500 hover:shadow-[0_16px_40px_-12px_rgba(124,58,237,0.1)]">
-                <div className="flex items-center justify-between mb-5">
+            {/* Tasks Completed */}
+            <div className="p-7 bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] hover:border-slate-200">
+                <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h3 className="text-[15px] font-extrabold text-[#1e1b32] tracking-tight">Weekly Appointments</h3>
-                        <p className="text-[11px] text-[#a09cb5] font-medium mt-0.5">This week's appointment volume</p>
+                        <h3 className="text-[18px] font-extrabold text-slate-800 tracking-tight">Tasks Completed</h3>
+                        <p className="text-[13px] text-slate-500 font-medium mt-1">Tasks successfully finished each day</p>
                     </div>
-                    <div className="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded-lg">This Week</div>
                 </div>
-                <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={appointmentsData}>
-                        <defs>
-                            <linearGradient id="colorAppt" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,58,237,0.06)" />
-                        <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#a09cb5', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: '#a09cb5', fontWeight: 600 }} axisLine={false} tickLine={false} width={30} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Area type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={2.5} fill="url(#colorAppt)" name="Appointments" />
-                    </AreaChart>
-                </ResponsiveContainer>
+                <div className="h-[280px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data} barSize={20} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 500 }} dy={15} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 500 }} dx={-10} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                            <Bar dataKey="tasks" name="Completed Tasks" radius={[6, 6, 6, 6]} fill="#6366f1" animationDuration={1000}>
+                                {data.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={index === data.length - 1 ? '#4f46e5' : '#c7d2fe'} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
         </div>
     );
 }
+

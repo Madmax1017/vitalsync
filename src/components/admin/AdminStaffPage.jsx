@@ -18,7 +18,7 @@ export default function AdminStaffPage() {
     const [showAddForm, setShowAddForm] = useState(false);
 
     // Form State
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'doctor' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'doctor', specialization: '' });
     const [formLoading, setFormLoading] = useState(false);
     const [formError, setFormError] = useState('');
 
@@ -77,13 +77,14 @@ export default function AdminStaffPage() {
                     name: formData.name,
                     email: formData.email,
                     password: formData.password,
-                    role: formData.role
+                    role: formData.role,
+                    specialization: formData.role === 'doctor' ? formData.specialization : null
                 }]);
 
             if (error) throw error;
 
             // Success
-            setFormData({ name: '', email: '', password: '', role: 'doctor' });
+            setFormData({ name: '', email: '', password: '', role: 'doctor', specialization: '' });
             setShowAddForm(false);
             fetchStaff();
 
@@ -175,6 +176,19 @@ export default function AdminStaffPage() {
                                                 <option value="nurse">Nurse</option>
                                             </select>
                                         </div>
+                                        {formData.role === 'doctor' && (
+                                            <div className="space-y-1.5 md:col-span-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <label className="text-sm font-bold text-slate-700 ml-1">Specialization</label>
+                                                <select required={formData.role === 'doctor'} value={formData.specialization} onChange={e => setFormData({ ...formData, specialization: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all font-medium cursor-pointer">
+                                                    <option value="" disabled>Select Specialization</option>
+                                                    <option value="Cardiologist">Cardiologist</option>
+                                                    <option value="Neurologist">Neurologist</option>
+                                                    <option value="Orthopedic">Orthopedic</option>
+                                                    <option value="General Physician">General Physician</option>
+                                                    <option value="Pediatrician">Pediatrician</option>
+                                                </select>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex justify-end pt-4">
                                         <button disabled={formLoading} type="submit" className="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold transition-all shadow-md active:scale-95 disabled:opacity-70 disabled:pointer-events-none flex items-center gap-2">
@@ -235,7 +249,14 @@ export default function AdminStaffPage() {
                                             </div>
                                         </div>
 
-                                        <RoleBadge role={s.role} />
+                                        <div className="flex flex-col items-start gap-2 mt-2">
+                                            <RoleBadge role={s.role} />
+                                            {s.role === 'doctor' && s.specialization && (
+                                                <span className="px-2.5 py-1 rounded-md border text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 w-fit bg-purple-100 text-purple-700 border-purple-200">
+                                                    {s.specialization}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="flex items-center justify-end pt-4 border-t border-slate-200/60 mt-auto">

@@ -4,7 +4,7 @@ import { FiSearch, FiBell, FiChevronDown, FiPlus } from 'react-icons/fi';
 export default function AdminTopBar() {
     const [userProfile, setUserProfile] = useState({
         name: localStorage.getItem('userEmail')?.split('@')[0] || 'Admin Master',
-        avatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=80&h=80'
+        avatar: null
     });
 
     useEffect(() => {
@@ -43,12 +43,16 @@ export default function AdminTopBar() {
                         <span className="text-[11px] text-violet-600 font-bold uppercase tracking-widest">System Controller</span>
                     </div>
                     <button className="flex items-center gap-2 group">
-                        <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-white shadow-md transition-transform duration-300 group-hover:scale-105 active:scale-95">
-                            <img
-                                src={userProfile.avatar}
-                                alt="Admin Profile"
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-white shadow-md transition-transform duration-300 group-hover:scale-105 active:scale-95 flex items-center justify-center bg-gradient-to-br from-violet-100 to-indigo-100 text-violet-700 font-bold text-lg">
+                            {userProfile.avatar ? (
+                                <img
+                                    src={userProfile.avatar}
+                                    alt="Admin Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span>{userProfile.name?.charAt(0)?.toUpperCase()}</span>
+                            )}
                         </div>
                         <FiChevronDown className="w-4 h-4 text-[#6b6490] group-hover:text-violet-600 transition-colors" />
                     </button>

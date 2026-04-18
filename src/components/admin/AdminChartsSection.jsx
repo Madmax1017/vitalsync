@@ -1,40 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, Cell, PieChart, Pie, Legend
+    BarChart, Bar, Cell
 } from 'recharts';
-
-const areaData = [
-    { name: 'Jan', inflow: 400 },
-    { name: 'Feb', inflow: 600 },
-    { name: 'Mar', inflow: 500 },
-    { name: 'Apr', inflow: 900 },
-    { name: 'May', inflow: 700 },
-    { name: 'Jun', inflow: 1100 },
-    { name: 'Jul', inflow: 1300 },
-];
-
-const barData = [
-    { name: 'Cardiology', workload: 85 },
-    { name: 'Neurology', workload: 65 },
-    { name: 'Pediatrics', workload: 45 },
-    { name: 'Orthopedics', workload: 75 },
-    { name: 'General', workload: 90 },
-];
-
-const pieData = [
-    { name: 'Occupied', value: 86, color: '#7c3aed' },
-    { name: 'Available', value: 14, color: '#e0e7ff' },
-];
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="glass-strong rounded-2xl px-4 py-3 shadow-2xl border border-white/50 backdrop-blur-2xl">
-                <p className="font-black text-[#1e1b32] text-sm mb-1">{label}</p>
-                <p className="font-extrabold text-violet-600 text-lg">
-                    {payload[0].value} <span className="text-xs text-[#a09cb5]">{payload[0].dataKey === 'inflow' ? 'Patients' : '%'}</span>
-                </p>
+            <div className="bg-white rounded-2xl px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-50 relative overflow-hidden">
+                <p className="font-bold text-slate-800 text-[13px] mb-3">{label}</p>
+                <div className="space-y-2">
+                    {payload.map((pl, i) => (
+                        <div key={i} className="flex items-center justify-between gap-6">
+                            <span className="text-[13px] font-medium text-slate-500 capitalize flex items-center gap-2.5">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: pl.color }} />
+                                {pl.name}
+                            </span>
+                            <span className="font-bold text-[14px]" style={{ color: pl.color }}>
+                                {pl.value}
+                            </span>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -42,139 +30,140 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function AdminChartsSection() {
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        const fetchAllData = async () => {
+            const today = new Date();
+            const daysArr = [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                daysArr.push({
+                    dateStr: d.toISOString().split('T')[0],
+                    name: dayNames[d.getDay()],
+                    patients: 0,
+                    appointments: 0,
+                    tasks: 0,
+                    medications: 0
+                });
+            }
+
+            const [pRes, aRes, tRes, mRes] = await Promise.all([
+                supabase.from('patients').select('created_at'),
+                supabase.from('appointments').select('appointment_date'),
+                supabase.from('tasks').select('created_at, status'),
+                supabase.from('medications').select('created_at')
+            ]);
+
+            const processResults = (res, dateField, mappedField, condition = () => true) => {
+                if (res.data) {
+                    res.data.forEach(item => {
+                        if (item[dateField] && condition(item)) {
+                            const dateStr = item[dateField].split('T')[0];
+                            const dayMatch = daysArr.find(d => d.dateStr === dateStr);
+                            if (dayMatch) dayMatch[mappedField] += 1;
+                        }
+                    });
+                }
+            };
+
+            processResults(pRes, 'created_at', 'patients');
+            processResults(aRes, 'appointment_date', 'appointments');
+            processResults(tRes, 'created_at', 'tasks', item => item.status === 'completed');
+            processResults(mRes, 'created_at', 'medications');
+
+            setData(daysArr);
+        };
+        fetchAllData();
+
+        const ch = supabase.channel('admin-charts-db')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchAllData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchAllData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchAllData)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'medications' }, fetchAllData)
+            .subscribe();
+
+        return () => supabase.removeChannel(ch);
+    }, []);
+
+    const ChartCard = ({ title, subtitle, className = "", children }) => (
+        <div className={`p-7 rounded-3xl bg-white border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative overflow-hidden group hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] hover:border-slate-200 transition-all duration-300 ${className}`}>
+            <div className="mb-8 relative z-10">
+                <h3 className="text-[18px] font-extrabold text-slate-800 tracking-tight">{title}</h3>
+                <p className="text-[13px] text-slate-500 font-medium mt-1">{subtitle}</p>
+            </div>
+            <div className="h-[280px] w-full relative z-10 w-[calc(100%+20px)] -ml-2">
+                {children}
+            </div>
+        </div>
+    );
+
+    const defaultAxisProps = {
+        axisLine: false,
+        tickLine: false,
+        tick: { fill: '#a09cb5', fontSize: 11, fontWeight: 700 },
+        dy: 10
+    };
+
     return (
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
-            {/* Area Chart: Patient Inflow */}
-            <div className="lg:col-span-8 p-8 rounded-[2.5rem] glass-strong border border-white/40 shadow-sm relative overflow-hidden group">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h3 className="text-xl font-black text-[#1e1b32] tracking-tight">Patient Inflow</h3>
-                        <p className="text-[13px] text-[#a09cb5] font-bold uppercase tracking-wider mt-1">Monthly Analytics</p>
-                    </div>
-                </div>
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <ChartCard title="Overview Trend" subtitle="Patients & Appointments (Last 7 Days)" className="lg:col-span-2">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={data}>
+                        <defs>
+                            <linearGradient id="colorPatients" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="colorAppts" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" {...defaultAxisProps} />
+                        <YAxis {...defaultAxisProps} dx={-10} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f8fafc', strokeWidth: 2 }} />
+                        <Area type="monotone" dataKey="patients" name="Patients" stroke="#4f46e5" strokeWidth={3} strokeLinecap="round" fillOpacity={1} fill="url(#colorPatients)" animationDuration={1000} activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5' }} />
+                        <Area type="monotone" dataKey="appointments" name="Appointments" stroke="#0ea5e9" strokeWidth={3} strokeLinecap="round" fillOpacity={1} fill="url(#colorAppts)" animationDuration={1000} activeDot={{ r: 6, strokeWidth: 0, fill: '#0ea5e9' }} />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </ChartCard>
 
-                <div className="h-[320px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={areaData}>
-                            <defs>
-                                <linearGradient id="colorInflow" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
-                            <XAxis
-                                dataKey="name"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#a09cb5', fontSize: 12, fontWeight: 700 }}
-                                dy={10}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#a09cb5', fontSize: 12, fontWeight: 700 }}
-                                dx={-10}
-                            />
-                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#7c3aed33', strokeWidth: 2 }} />
-                            <Area
-                                type="monotone"
-                                dataKey="inflow"
-                                stroke="#7c3aed"
-                                strokeWidth={4}
-                                fillOpacity={1}
-                                fill="url(#colorInflow)"
-                                animationDuration={2000}
-                                animationEasing="ease-in-out"
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
+            <ChartCard title="Tasks Completed" subtitle="Total completed system tasks">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} barSize={20}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" {...defaultAxisProps} />
+                        <YAxis {...defaultAxisProps} dx={-10} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                        <Bar dataKey="tasks" name="Tasks" radius={[6, 6, 6, 6]} fill="#6366f1" animationDuration={1000}>
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={index === data.length - 1 ? '#4f46e5' : '#c7d2fe'} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </ChartCard>
 
-            {/* Pie Chart: Resource Usage */}
-            <div className="lg:col-span-4 p-8 rounded-[2.5rem] glass-strong border border-white/40 shadow-sm relative overflow-hidden flex flex-col items-center">
-                <div className="w-full text-left mb-8">
-                    <h3 className="text-xl font-black text-[#1e1b32] tracking-tight">Bed Occupancy</h3>
-                    <p className="text-[13px] text-[#a09cb5] font-bold uppercase tracking-wider mt-1">Real-time Usage</p>
-                </div>
-
-                <div className="h-[220px] w-full relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={70}
-                                outerRadius={90}
-                                paddingAngle={10}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                            >
-                                {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span className="text-4xl font-black text-[#1e1b32]">86%</span>
-                        <span className="text-[11px] font-bold text-[#a09cb5] uppercase tracking-widest">Occupied</span>
-                    </div>
-                </div>
-
-                <div className="mt-6 flex gap-6">
-                    {pieData.map((item, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-[13px] font-bold text-[#6b6490]">{item.name}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Bar Chart: Department Workload */}
-            <div className="lg:col-span-12 p-8 rounded-[2.5rem] glass-strong border border-white/40 shadow-sm mt-8 relative overflow-hidden">
-                <div className="mb-8">
-                    <h3 className="text-xl font-black text-[#1e1b32] tracking-tight">Departmental Workload</h3>
-                    <p className="text-[13px] text-[#a09cb5] font-bold uppercase tracking-wider mt-1">Staff Utilization Index</p>
-                </div>
-
-                <div className="h-[280px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barData} barGap={0} barSize={40}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
-                            <XAxis
-                                dataKey="name"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#a09cb5', fontSize: 12, fontWeight: 700 }}
-                                dy={10}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#a09cb5', fontSize: 12, fontWeight: 700 }}
-                                dx={-10}
-                                domain={[0, 100]}
-                            />
-                            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#7c3aed05' }} />
-                            <Bar
-                                dataKey="workload"
-                                radius={[10, 10, 0, 0]}
-                                animationDuration={2000}
-                                animationEasing="ease-in-out"
-                            >
-                                {barData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#7c3aed' : '#818cf8'} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
+            <ChartCard title="Medication Activity" subtitle="Prescriptions issued by day">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} barSize={20}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" {...defaultAxisProps} />
+                        <YAxis {...defaultAxisProps} dx={-10} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                        <Bar dataKey="medications" name="Medications" radius={[6, 6, 6, 6]} fill="#10b981" animationDuration={1000}>
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={index === data.length - 1 ? '#059669' : '#a7f3d0'} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </ChartCard>
         </section>
     );
 }

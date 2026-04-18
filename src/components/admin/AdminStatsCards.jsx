@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FiUsers, FiUserCheck, FiActivity, FiCalendar, FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiCheckSquare, FiFileText } from 'react-icons/fi';
 import { supabase } from '../../supabaseClient';
 
 export default function AdminStatsCards() {
     const [patientCount, setPatientCount] = useState('—');
     const [appointmentCount, setAppointmentCount] = useState('—');
+    const [taskCount, setTaskCount] = useState('—');
+    const [medicationCount, setMedicationCount] = useState('—');
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -17,6 +19,16 @@ export default function AdminStatsCards() {
                 .from('appointments')
                 .select('*', { count: 'exact', head: true });
             setAppointmentCount(aCount ?? 0);
+
+            const { count: tCount } = await supabase
+                .from('tasks')
+                .select('*', { count: 'exact', head: true });
+            setTaskCount(tCount ?? 0);
+
+            const { count: mCount } = await supabase
+                .from('medications')
+                .select('*', { count: 'exact', head: true });
+            setMedicationCount(mCount ?? 0);
         };
 
         fetchCounts();
@@ -25,6 +37,8 @@ export default function AdminStatsCards() {
             .channel('admin-stats')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchCounts)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'medications' }, fetchCounts)
             .subscribe();
 
         return () => supabase.removeChannel(sub);
@@ -34,66 +48,51 @@ export default function AdminStatsCards() {
         {
             title: 'Total Patients',
             value: patientCount,
-            change: 'Live count',
-            isUp: true,
+            change: 'All time',
             icon: FiUsers,
-            gradient: 'from-violet-600 to-indigo-600',
-            bg: 'bg-violet-50',
-            color: 'text-violet-600'
-        },
-        {
-            title: 'Active Staff',
-            value: '348',
-            change: '+4.2%',
-            isUp: true,
-            icon: FiUserCheck,
-            gradient: 'from-indigo-600 to-blue-600',
+            color: 'text-indigo-600',
             bg: 'bg-indigo-50',
-            color: 'text-indigo-600'
         },
         {
-            title: 'Bed Occupancy',
-            value: '86%',
-            change: '-2.1%',
-            isUp: false,
-            icon: FiActivity,
-            gradient: 'from-blue-600 to-cyan-600',
-            bg: 'bg-blue-50',
-            color: 'text-blue-600'
-        },
-        {
-            title: 'Total Appointments',
+            title: 'Appointments',
             value: appointmentCount,
-            change: 'Live count',
-            isUp: true,
+            change: 'Scheduled',
             icon: FiCalendar,
-            gradient: 'from-cyan-600 to-emerald-600',
-            bg: 'bg-cyan-50',
-            color: 'text-cyan-600'
-        }
+            color: 'text-sky-600',
+            bg: 'bg-sky-50',
+        },
+        {
+            title: 'Tasks',
+            value: taskCount,
+            change: 'Total system',
+            icon: FiCheckSquare,
+            color: 'text-violet-600',
+            bg: 'bg-violet-50',
+        },
+        {
+            title: 'Medications',
+            value: medicationCount,
+            change: 'Prescriptions',
+            icon: FiFileText,
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50',
+        },
     ];
 
     return (
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
-                <div key={i} className="group relative p-6 rounded-[2rem] glass-strong border border-white/40 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:bg-white/90 hover:shadow-xl hover:border-violet-200/50">
-                    <div className="flex items-start justify-between mb-4">
-                        <div className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                <div key={i} className="group p-7 rounded-3xl bg-white border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] hover:border-slate-200">
+                    <div className="flex items-center justify-between mb-5">
+                        <div className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color}`}>
                             <stat.icon className="w-6 h-6 stroke-[2.5]" />
-                        </div>
-                        <div className={`flex items-center gap-1 font-black text-[12px] px-2.5 py-1 rounded-full ${stat.isUp ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                            {stat.isUp ? <FiArrowUpRight className="w-3 h-3" /> : <FiArrowDownRight className="w-3 h-3" />}
-                            {stat.change}
                         </div>
                     </div>
 
                     <div className="flex flex-col">
-                        <span className="text-[14px] font-bold text-[#6b6490] tracking-wide mb-1 uppercase">{stat.title}</span>
-                        <h3 className="text-3xl font-black text-[#1e1b32] tracking-tighter">{stat.value}</h3>
+                        <h3 className="text-3xl font-extrabold text-slate-800 tracking-tight mb-1.5">{stat.value}</h3>
+                        <span className="text-[14px] font-semibold text-slate-500">{stat.title}</span>
                     </div>
-
-                    {/* Subtle bottom gradient bar */}
-                    <div className={`absolute bottom-0 left-6 right-6 h-1 w-0 opacity-0 bg-gradient-to-r ${stat.gradient} rounded-full transition-all duration-500 group-hover:w-[calc(100%-3rem)] group-hover:opacity-100`} />
                 </div>
             ))}
         </section>

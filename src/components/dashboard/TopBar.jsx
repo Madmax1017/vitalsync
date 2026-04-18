@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { FiBell, FiChevronDown } from 'react-icons/fi';
 
 export default function TopBar() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = localStorage.getItem('role') || 'doctor';
+
     const [userProfile, setUserProfile] = useState({
-        name: 'Dr. Sarah Chen',
-        avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=80&h=80'
+        name: user.name || 'Doctor',
+        avatar: null,
+        specialization: user.specialization || (role === 'doctor' ? 'Cardiologist' : 'Specialist')
     });
 
     useEffect(() => {
@@ -26,27 +30,29 @@ export default function TopBar() {
     }, []);
 
     return (
-        <header className="w-full flex items-center justify-end gap-4 py-4 px-6 glass-strong rounded-2xl border border-white/20 shadow-sm">
+        <header className="w-full flex items-center justify-end gap-4 py-4 px-6 bg-white rounded-3xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
             {/* Right side */}
             <div className="flex items-center gap-3">
                 {/* Notification */}
-                <button className="relative w-10 h-10 rounded-xl bg-white/40 border border-white/30 flex items-center justify-center text-[#6b6490] hover:bg-white/60 hover:text-violet-600 transition-all duration-300 hover:shadow-sm">
+                <button className="relative w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-300 hover:shadow-sm">
                     <FiBell className="w-5 h-5 stroke-[1.5]" />
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-full flex items-center justify-center text-[8px] text-white font-bold shadow-sm">3</span>
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center text-[8px] text-white font-bold shadow-sm border border-white">3</span>
                 </button>
 
                 {/* Profile */}
-                <button className="flex items-center gap-3 bg-white/40 border border-white/30 rounded-xl px-3 py-2 hover:bg-white/60 transition-all duration-300 hover:shadow-sm">
-                    <img
-                        src={userProfile.avatar}
-                        alt="Doctor"
-                        className="w-8 h-8 rounded-lg object-cover shadow-sm"
-                    />
-                    <div className="hidden sm:flex flex-col items-start">
-                        <span className="text-[13px] font-bold text-[#1e1b32] leading-tight">{userProfile.name}</span>
-                        <span className="text-[11px] text-[#6b6490] font-medium">Cardiologist</span>
+                <button className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 hover:bg-slate-100 transition-all duration-300 hover:shadow-sm">
+                    <div className="w-8 h-8 rounded-lg shadow-sm flex items-center justify-center bg-indigo-50 text-indigo-700 font-bold text-[13px] shrink-0">
+                        {userProfile.avatar ? (
+                            <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover rounded-lg" />
+                        ) : (
+                            <span>{userProfile.name?.charAt(0)?.toUpperCase() || 'D'}</span>
+                        )}
                     </div>
-                    <FiChevronDown className="w-4 h-4 text-[#6b6490] hidden sm:block" />
+                    <div className="hidden sm:flex flex-col items-start gap-0.5">
+                        <span className="text-[13px] font-bold text-slate-800 leading-none">{userProfile.name}</span>
+                        <span className="text-[11px] text-slate-500 font-medium leading-none">{userProfile.specialization}</span>
+                    </div>
+                    <FiChevronDown className="w-4 h-4 text-slate-400 hidden sm:block ml-1" />
                 </button>
             </div>
         </header>

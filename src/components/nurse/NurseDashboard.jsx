@@ -70,6 +70,13 @@ export default function NurseDashboard() {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [stats, setStats] = useState({ patients: 0, pendingTasks: 0 });
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = localStorage.getItem('role') || 'nurse';
+    const hour = new Date().getHours();
+    const timeGreeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+    const nameStr = user.name?.split(' ')[0] || 'Nurse';
+    const prefix = role === 'doctor' && !nameStr.toLowerCase().startsWith('dr') ? 'Dr. ' : '';
+
     useEffect(() => {
         const nurseEmail = localStorage.getItem('userEmail') || 'nurse@vitalsync.com';
 
@@ -119,7 +126,7 @@ export default function NurseDashboard() {
 
                     <div className="px-1">
                         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#1e1b32] mb-1">
-                            Good Morning, <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500">{JSON.parse(localStorage.getItem('user') || '{}').name?.split(' ')[0] || 'Nurse'}</span> 💊
+                            {timeGreeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500">{prefix}{nameStr}</span> 👋
                         </h1>
                         <p className="text-[14px] text-[#a09cb5] font-medium">
                             You have {stats.patients} patients assigned and {stats.pendingTasks} pending tasks.

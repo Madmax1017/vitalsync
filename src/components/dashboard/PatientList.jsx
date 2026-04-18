@@ -47,33 +47,33 @@ export default function PatientList() {
     console.log("Patients:", patients);
 
     return (
-        <div className="p-5 rounded-2xl glass overflow-hidden transition-all duration-500 hover:shadow-[0_16px_40px_-12px_rgba(124,58,237,0.08)]">
-            <div className="flex items-center justify-between mb-5">
+        <div className="p-7 bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] hover:border-slate-200">
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-[15px] font-extrabold text-[#1e1b32] tracking-tight">System Patients</h3>
-                    <p className="text-[11px] text-[#a09cb5] font-medium mt-0.5">Real-time database records</p>
+                    <h3 className="text-[16px] font-extrabold text-slate-800 tracking-tight">System Patients</h3>
+                    <p className="text-[12px] text-slate-500 font-medium mt-0.5">Real-time database records</p>
                 </div>
-                <button className="text-[12px] font-bold text-violet-600 hover:text-violet-700 transition-colors">View All</button>
+                <button className="text-[13px] font-bold text-indigo-600 hover:text-indigo-700 transition-colors">View All</button>
             </div>
 
             <div className="space-y-3 min-h-[100px]">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-[#a09cb5]">
+                    <div className="flex flex-col items-center justify-center py-10 text-slate-400">
                         <FiLoader className="w-8 h-8 animate-spin mb-2" />
                         <span className="text-[12px] font-bold uppercase tracking-widest">Fetching Patients...</span>
                     </div>
                 ) : patients && patients.length > 0 ? (
                     patients.map((patient, i) => (
-                        <div key={patient.id || i} className="group flex items-center gap-4 p-3 rounded-xl bg-white/30 border border-white/20 hover:bg-white/60 hover:shadow-sm transition-all duration-300 cursor-pointer">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center text-[14px] font-black text-violet-700 shadow-sm shrink-0 group-hover:scale-105 transition-transform duration-300">
+                        <div key={patient.id || i} className="group flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-50 hover:bg-slate-50 hover:border-slate-100 hover:shadow-sm transition-all duration-300 cursor-pointer">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[14px] font-bold text-indigo-600 shrink-0">
                                 {patient.name.split(' ').map(n => n[0]).join('')}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="text-[13px] font-bold text-[#1e1b32] truncate">{patient.name}</div>
-                                <div className="text-[11px] text-[#a09cb5] font-medium truncate">Age {patient.age} · {patient.condition}</div>
+                                <div className="text-[14px] font-bold text-slate-800 truncate leading-tight">{patient.name}</div>
+                                <div className="text-[12px] text-slate-500 font-medium truncate mt-1">Age {patient.age} · {patient.condition}</div>
                             </div>
                             <div className="text-right shrink-0">
-                                <div className="text-[11px] font-semibold text-[#6b6490] mb-1">Rm {patient.room}</div>
+                                <div className="text-[12px] font-semibold text-slate-500 mb-1.5">Rm {patient.room}</div>
                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusStyles(patient.status)}`}>
                                     {patient.status}
                                 </span>
@@ -81,7 +81,7 @@ export default function PatientList() {
                         </div>
                     ))
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-10 text-[#a09cb5] bg-white/10 rounded-xl border border-dashed border-white/20">
+                    <div className="flex flex-col items-center justify-center py-10 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                         <FiInbox className="w-8 h-8 mb-2 opacity-50" />
                         <span className="text-[12px] font-bold uppercase tracking-widest">No patients found</span>
                     </div>

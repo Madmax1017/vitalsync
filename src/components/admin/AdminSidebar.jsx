@@ -11,7 +11,6 @@ const menuItems = [
     { icon: FiFileText, label: 'Appointments', path: '/admin/appointments' },
     { icon: FiBriefcase, label: 'Staff Management', path: '/admin/staff' },
     { icon: FiCoffee, label: 'Canteen Orders', path: '/admin/canteen' },
-    { icon: FiBarChart2, label: 'Analytics', path: '/admin/analytics' },
     { icon: FiUser, label: 'Profile', path: '/admin/profile' },
 ];
 

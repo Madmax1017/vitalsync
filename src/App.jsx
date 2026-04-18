@@ -13,7 +13,6 @@ import AdminLogin from './components/auth/AdminLogin';
 import NurseNotesPage from './components/nurse/NurseNotesPage';
 import NurseSchedulePage from './components/nurse/NurseSchedulePage';
 import NursePatientsPage from './components/nurse/NursePatientsPage';
-import AdminAnalyticsPage from './components/admin/AdminAnalyticsPage';
 import AdminPatientsPage from './components/admin/AdminPatientsPage';
 import AdminAppointmentsPage from './components/admin/AdminAppointmentsPage';
 import DoctorProfilePage from './components/doctor/DoctorProfilePage';
@@ -49,7 +48,6 @@ function App() {
         <Route path="/nurse/canteen" element={<NurseCanteenPage />} />
         <Route path="/nurse/profile" element={<NurseProfilePage />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="/admin/patients" element={<AdminPatientsPage />} />
         <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
         <Route path="/admin/staff" element={<AdminStaffPage />} />

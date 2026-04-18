@@ -2,11 +2,11 @@ import React from 'react';
 import { FiEdit2, FiTrash2, FiMoreVertical, FiSearch, FiFilter } from 'react-icons/fi';
 
 const staffData = [
-    { id: 1, name: 'Dr. Sarah Johnson', role: 'Chief of Medicine', department: 'Cardiology', status: 'Active', avatar: 'https://images.unsplash.com/photo-1559839734-2b71ca2737d3?auto=format&fit=crop&w=80&h=80' },
-    { id: 2, name: 'Dr. Michael Chen', role: 'Senior Surgeon', department: 'Neurology', status: 'On Duty', avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=80&h=80' },
-    { id: 3, name: 'Nurse Emily Davis', role: 'Head Nurse', department: 'ICU', status: 'Active', avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964ac31?auto=format&fit=crop&w=80&h=80' },
-    { id: 4, name: 'Dr. James Wilson', role: 'Specialist', department: 'Pediatrics', status: 'Off Duty', avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=80&h=80' },
-    { id: 5, name: 'Nurse David Brown', role: 'Staff Nurse', department: 'General', status: 'Active', avatar: 'https://images.unsplash.com/photo-1584432810601-6c7f27d2362b?auto=format&fit=crop&w=80&h=80' },
+    { id: 1, name: 'Dr. Sarah Johnson', role: 'Chief of Medicine', department: 'Cardiology', status: 'Active', avatar: null },
+    { id: 2, name: 'Dr. Michael Chen', role: 'Senior Surgeon', department: 'Neurology', status: 'On Duty', avatar: null },
+    { id: 3, name: 'Nurse Emily Davis', role: 'Head Nurse', department: 'ICU', status: 'Active', avatar: null },
+    { id: 4, name: 'Dr. James Wilson', role: 'Specialist', department: 'Pediatrics', status: 'Off Duty', avatar: null },
+    { id: 5, name: 'Nurse David Brown', role: 'Staff Nurse', department: 'General', status: 'Active', avatar: null },
 ];
 
 const getStatusStyles = (status) => {
@@ -59,8 +59,13 @@ export default function StaffTable() {
                             <tr key={staff.id} className="group/row transition-all duration-300 hover:bg-white/40">
                                 <td className="py-4 px-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-white shadow-sm shrink-0">
-                                            <img src={staff.avatar} alt={staff.name} className="w-full h-full object-cover" />
+                                        <div className={`w-10 h-10 rounded-xl overflow-hidden border-2 border-white shadow-sm shrink-0 flex items-center justify-center font-bold text-lg
+                                            ${staff.name.startsWith('Dr.') ? 'bg-gradient-to-br from-blue-100 to-sky-100 text-blue-600' : 'bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-600'}`}>
+                                            {staff.avatar ? (
+                                                <img src={staff.avatar} alt={staff.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span>{staff.name.replace('Dr. ', '').replace('Nurse ', '').charAt(0)}</span>
+                                            )}
                                         </div>
                                         <div>
                                             <div className="text-[14px] font-black text-[#1e1b32]">{staff.name}</div>
