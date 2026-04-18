@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiClipboard, FiHeart, FiShield, FiUser } from 'react-icons/fi';
+import { LuStethoscope, LuHeartPulse, LuLayoutDashboard, LuUser } from 'react-icons/lu';
 import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -10,36 +10,37 @@ const roles = [
     {
         title: 'Doctor Dashboard',
         description: 'Manage patients, appointments, and prescriptions from a single, intelligent command center.',
-        icon: FiClipboard,
+        icon: LuStethoscope,
         link: '/login/doctor',
         gradient: 'from-violet-500 to-indigo-500',
         iconBg: 'bg-violet-100',
         iconColor: 'text-violet-600',
-        glowColor: 'rgba(139, 92, 246, 0.15)',
+        glowColor: 'rgba(139, 92, 246, 0.4)',
     },
     {
         title: 'Nurse Dashboard',
         description: 'Coordinate tasks, track vitals, and manage patient workflows in real time.',
-        icon: FiHeart,
+        icon: LuHeartPulse,
         link: '/login/nurse',
         gradient: 'from-rose-400 to-pink-500',
+        iconBg: 'bg-rose-100',
         iconColor: 'text-rose-600',
-        glowColor: 'rgba(251, 113, 133, 0.15)',
+        glowColor: 'rgba(251, 113, 133, 0.4)',
     },
     {
         title: 'Admin Panel',
         description: 'Oversee hospital operations, staffing, analytics, and system configurations.',
-        icon: FiShield,
+        icon: LuLayoutDashboard,
         link: '/login/admin',
         gradient: 'from-indigo-500 to-purple-500',
         iconBg: 'bg-indigo-100',
         iconColor: 'text-indigo-600',
-        glowColor: 'rgba(99, 102, 241, 0.15)',
+        glowColor: 'rgba(99, 102, 241, 0.4)',
     },
     {
         title: 'Patient Portal',
         description: 'Access records, book appointments, and communicate with your care team.',
-        icon: FiUser,
+        icon: LuUser,
         link: '#',
         gradient: 'from-emerald-400 to-teal-500',
         iconBg: 'bg-emerald-100',
@@ -102,11 +103,11 @@ export default function NavigationHub() {
                         <Link
                             key={i}
                             to={role.link}
-                            className="group relative flex flex-col p-7 rounded-[2rem] glass overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:bg-white/80 cursor-pointer no-underline"
+                            className="group relative flex flex-col p-7 rounded-[2rem] glass overflow-hidden transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] hover:bg-white/90 hover:shadow-[0_20px_40px_-15px_var(--glow-color)] cursor-pointer no-underline"
                             style={{ '--glow-color': role.glowColor }}
                         >
                             {/* Hover glow */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ boxShadow: `0 20px 50px -12px var(--glow-color), inset 0 1px 0 rgba(255,255,255,0.5)` }} />
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ boxShadow: `inset 0 0 0 2px var(--glow-color)` }} />
 
                             {/* Subtle grid on hover */}
                             <div className="absolute inset-0 bg-[linear-gradient(to_right,#c4b5fd22_1px,transparent_1px),linear-gradient(to_bottom,#c4b5fd22_1px,transparent_1px)] bg-[size:1rem_1rem] opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_20%,transparent_100%)]" />

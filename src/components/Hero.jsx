@@ -2,12 +2,13 @@ import React, { useEffect, useRef, Suspense } from 'react';
 import gsap from 'gsap';
 import { Canvas } from '@react-three/fiber';
 import ThreeDModel from './ThreeDModel';
-import {OrbitControls} from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 
 export default function Hero() {
     const heroRef = useRef(null);
     const textRef = useRef(null);
     const btnsRef = useRef(null);
+    const modelRef = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -27,6 +28,15 @@ export default function Hero() {
                 stagger: 0.1,
                 ease: 'power3.out',
                 delay: 0.8
+            });
+
+            gsap.from(modelRef.current, {
+                scale: 0.8,
+                y: 50,
+                opacity: 0,
+                duration: 1.5,
+                ease: 'power3.out',
+                delay: 0.5
             });
         }, heroRef);
 
@@ -89,38 +99,32 @@ export default function Hero() {
                         </button>
                     </div>
 
-                    {/* Social Proof */}
+                    {/* Refined Micro-copy */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div className="flex -space-x-3">
-                            <img className="w-10 h-10 rounded-full border-[3px] border-white/80 object-cover shadow-sm" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=64&h=64" alt="Doctor 1" />
-                            <img className="w-10 h-10 rounded-full border-[3px] border-white/80 object-cover shadow-sm" src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=64&h=64" alt="Doctor 2" />
-                            <img className="w-10 h-10 rounded-full border-[3px] border-white/80 object-cover shadow-sm" src="https://images.unsplash.com/photo-1594824432258-2900a68d4a99?auto=format&fit=crop&w=64&h=64" alt="Doctor 3" />
-                            <div className="w-10 h-10 rounded-full border-[3px] border-white/80 glass flex items-center justify-center text-xs font-bold text-violet-700 shadow-sm z-10">
-                                +2k
-                            </div>
-                        </div>
-                        <div className="text-sm text-[#5b5675] font-medium">
-                            Trusted by <span className="font-bold text-[#1e1b32]">2,000+</span> healthcare visionaries
+                        <div className="text-sm border-l-2 border-violet-500/30 pl-4 py-1 text-[#5b5675] font-medium tracking-wide">
+                            Seamlessly connecting <span className="font-semibold text-[#1e1b32]">healthcare professionals</span><br />for better patient outcomes.
                         </div>
                     </div>
                 </div>
 
                 {/* Right Side: 3D Element */}
-                <div className="flex justify-center items-center h-[400px] md:h-[600px] w-full relative">
+                <div className="flex justify-center items-center h-[400px] md:h-[600px] w-full relative" ref={modelRef}>
                     {/* Glow behind 3D model */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-[350px] h-[350px] bg-violet-500/15 rounded-full blur-[80px]" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                        <div className="w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.12)_0%,rgba(0,0,0,0)_70%)] blur-[40px]" />
+                        <div className="absolute w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,rgba(0,0,0,0)_70%)] blur-[30px] translate-x-12 translate-y-8" />
                     </div>
-                    <Suspense fallback={
-                        <div className="flex items-center justify-center h-full w-full">
-                            <div className="w-16 h-16 border-4 border-violet-400 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    }>
-                        <Canvas camera={{ position: [0, 0, 5], fov: 45 }} className="w-full h-full">
-                            <ThreeDModel />
-                            <OrbitControls />
-                        </Canvas>
-                    </Suspense>
+                    <div className="relative z-10 w-full h-full opacity-90 hover:opacity-100 transition-opacity duration-700">
+                        <Suspense fallback={
+                            <div className="flex items-center justify-center h-full w-full">
+                                <div className="w-16 h-16 border-4 border-violet-400 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        }>
+                            <Canvas camera={{ position: [0, 0, 5], fov: 45 }} className="w-full h-full">
+                                <ThreeDModel />
+                            </Canvas>
+                        </Suspense>
+                    </div>
                 </div>
             </div>
         </section>
