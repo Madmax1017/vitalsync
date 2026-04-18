@@ -1,9 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiBell, FiChevronDown, FiPlus } from 'react-icons/fi';
 
 export default function AdminTopBar() {
-    const userEmail = localStorage.getItem('userEmail') || '';
-    const adminName = userEmail ? userEmail.split('@')[0] : 'Admin Master';
+    const [userProfile, setUserProfile] = useState({
+        name: localStorage.getItem('userEmail')?.split('@')[0] || 'Admin Master',
+        avatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=80&h=80'
+    });
+
+    useEffect(() => {
+        const updateUserData = () => {
+            const lsUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const email = localStorage.getItem('userEmail');
+            const lsAvatar = email ? localStorage.getItem(`avatar_${email}`) : null;
+            if (lsUser.name || lsAvatar) {
+                setUserProfile(prev => ({
+                    ...prev,
+                    name: lsUser.name || localStorage.getItem('userEmail')?.split('@')[0] || prev.name,
+                    avatar: lsAvatar || prev.avatar
+                }));
+            }
+        };
+        updateUserData();
+        window.addEventListener('user-profile-updated', updateUserData);
+        return () => window.removeEventListener('user-profile-updated', updateUserData);
+    }, []);
 
     return (
         <header className="w-full flex items-center justify-end gap-6 py-4 px-6 glass-strong rounded-3xl border border-white/30 shadow-sm backdrop-blur-xl">
@@ -19,13 +39,13 @@ export default function AdminTopBar() {
                 {/* Profile */}
                 <div className="flex items-center gap-3 pl-2 border-l border-white/20">
                     <div className="flex flex-col items-end hidden md:flex">
-                        <span className="text-[14px] font-black text-[#1e1b32] leading-tight capitalize">{adminName}</span>
+                        <span className="text-[14px] font-black text-[#1e1b32] leading-tight capitalize">{userProfile.name}</span>
                         <span className="text-[11px] text-violet-600 font-bold uppercase tracking-widest">System Controller</span>
                     </div>
                     <button className="flex items-center gap-2 group">
                         <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-white shadow-md transition-transform duration-300 group-hover:scale-105 active:scale-95">
                             <img
-                                src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=80&h=80"
+                                src={userProfile.avatar}
                                 alt="Admin Profile"
                                 className="w-full h-full object-cover"
                             />

@@ -5,6 +5,8 @@ import { supabase } from '../../supabaseClient';
 export default function StatsCards() {
     const [patientCount, setPatientCount] = useState('—');
     const [appointmentCount, setAppointmentCount] = useState('—');
+    const [taskCount, setTaskCount] = useState('—');
+    const [medicationCount, setMedicationCount] = useState('—');
 
     const userEmail = localStorage.getItem('userEmail') || '';
 
@@ -20,6 +22,19 @@ export default function StatsCards() {
                 .select('*', { count: 'exact', head: true })
                 .eq('doctor_email', userEmail);
             setAppointmentCount(aCount ?? 0);
+
+            const { count: tCount } = await supabase
+                .from('tasks')
+                .select('*', { count: 'exact', head: true })
+                .eq('assigned_by', userEmail);
+            setTaskCount(tCount ?? 0);
+
+            const { count: mCount } = await supabase
+                .from('medications')
+                .select('*', { count: 'exact', head: true })
+                .eq('prescribed_by', userEmail)
+                .eq('status', 'active');
+            setMedicationCount(mCount ?? 0);
         };
 
         fetchCounts();
@@ -28,6 +43,8 @@ export default function StatsCards() {
             .channel('doctor-stats')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'patients' }, fetchCounts)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'medications' }, fetchCounts)
             .subscribe();
 
         return () => supabase.removeChannel(sub);
@@ -53,18 +70,18 @@ export default function StatsCards() {
             textAccent: 'text-blue-600',
         },
         {
-            title: 'Critical Cases',
-            value: '3',
-            change: '1 needs review',
+            title: 'Active Tasks',
+            value: taskCount,
+            change: 'Assigned by you',
             icon: FiAlertTriangle,
             gradient: 'from-rose-400 to-pink-500',
             bgAccent: 'bg-rose-100',
             textAccent: 'text-rose-600',
         },
         {
-            title: 'Reports',
-            value: '12',
-            change: '5 pending',
+            title: 'Active Meds',
+            value: medicationCount,
+            change: 'Prescribed recently',
             icon: FiFileText,
             gradient: 'from-emerald-400 to-teal-500',
             bgAccent: 'bg-emerald-100',

@@ -16,6 +16,11 @@ import NursePatientsPage from './components/nurse/NursePatientsPage';
 import AdminAnalyticsPage from './components/admin/AdminAnalyticsPage';
 import AdminPatientsPage from './components/admin/AdminPatientsPage';
 import AdminAppointmentsPage from './components/admin/AdminAppointmentsPage';
+import DoctorProfilePage from './components/doctor/DoctorProfilePage';
+import NurseProfilePage from './components/nurse/NurseProfilePage';
+import AdminProfilePage from './components/admin/AdminProfilePage';
+import MedicationsPage from './components/doctor/MedicationsPage';
+import NurseMedicationsPage from './components/nurse/NurseMedicationsPage';
 
 function App() {
   return (
@@ -26,15 +31,20 @@ function App() {
         <Route path="/doctor/patients" element={<PatientsPage />} />
         <Route path="/doctor/appointments" element={<AppointmentsPage />} />
         <Route path="/doctor/tasks" element={<DoctorTasksPage />} />
+        <Route path="/doctor/medications" element={<MedicationsPage />} />
+        <Route path="/doctor/profile" element={<DoctorProfilePage />} />
         <Route path="/nurse" element={<NurseDashboard />} />
         <Route path="/nurse/tasks" element={<NurseTasksPage />} />
+        <Route path="/nurse/medications" element={<NurseMedicationsPage />} />
         <Route path="/nurse/notes" element={<NurseNotesPage />} />
         <Route path="/nurse/schedule" element={<NurseSchedulePage />} />
         <Route path="/nurse/patients" element={<NursePatientsPage />} />
+        <Route path="/nurse/profile" element={<NurseProfilePage />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="/admin/patients" element={<AdminPatientsPage />} />
         <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+        <Route path="/admin/profile" element={<AdminProfilePage />} />
         <Route path="/login/doctor" element={<DoctorLogin />} />
         <Route path="/login/nurse" element={<NurseLogin />} />
         <Route path="/login/admin" element={<AdminLogin />} />

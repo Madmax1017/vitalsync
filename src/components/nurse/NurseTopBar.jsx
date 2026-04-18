@@ -1,7 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiBell, FiChevronDown } from 'react-icons/fi';
 
 export default function NurseTopBar() {
+    const [userProfile, setUserProfile] = useState({
+        name: 'Nurse Priya',
+        avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964ac31?auto=format&fit=crop&w=80&h=80'
+    });
+
+    useEffect(() => {
+        const updateUserData = () => {
+            const lsUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const email = localStorage.getItem('userEmail');
+            const lsAvatar = email ? localStorage.getItem(`avatar_${email}`) : null;
+            if (lsUser.name || lsAvatar) {
+                setUserProfile(prev => ({
+                    ...prev,
+                    name: lsUser.name || prev.name,
+                    avatar: lsAvatar || prev.avatar
+                }));
+            }
+        };
+        updateUserData();
+        window.addEventListener('user-profile-updated', updateUserData);
+        return () => window.removeEventListener('user-profile-updated', updateUserData);
+    }, []);
+
     return (
         <header className="w-full flex items-center justify-end gap-4 py-4 px-6 glass-strong rounded-2xl border border-white/20 shadow-sm">
             <div className="flex items-center gap-3">
@@ -21,12 +44,12 @@ export default function NurseTopBar() {
 
                 <button className="flex items-center gap-3 bg-white/40 border border-white/30 rounded-xl px-3 py-2 hover:bg-white/60 transition-all duration-300 hover:shadow-sm">
                     <img
-                        src="https://images.unsplash.com/photo-1594824476967-48c8b964ac31?auto=format&fit=crop&w=80&h=80"
+                        src={userProfile.avatar}
                         alt="Nurse"
                         className="w-8 h-8 rounded-lg object-cover shadow-sm"
                     />
                     <div className="hidden sm:flex flex-col items-start">
-                        <span className="text-[13px] font-bold text-[#1e1b32] leading-tight">Nurse Priya</span>
+                        <span className="text-[13px] font-bold text-[#1e1b32] leading-tight">{userProfile.name}</span>
                         <span className="text-[11px] text-[#6b6490] font-medium">ICU Ward</span>
                     </div>
                     <FiChevronDown className="w-4 h-4 text-[#6b6490] hidden sm:block" />

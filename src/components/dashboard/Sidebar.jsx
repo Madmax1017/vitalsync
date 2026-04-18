@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    FiGrid, FiUsers, FiCalendar, FiFileText, FiSettings,
+    FiGrid, FiUsers, FiCalendar, FiFileText, FiUser,
     FiLogOut, FiChevronLeft, FiChevronRight, FiHeart, FiBarChart2, FiCheckSquare
 } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,9 +10,10 @@ const menuItems = [
     { icon: FiUsers, label: 'Patients', path: '/doctor/patients' },
     { icon: FiCalendar, label: 'Appointments', path: '/doctor/appointments' },
     { icon: FiCheckSquare, label: 'Tasks', path: '/doctor/tasks' },
+    { icon: FiHeart, label: 'Medications', path: '/doctor/medications' },
     { icon: FiBarChart2, label: 'Analytics', path: '/doctor/analytics' },
     { icon: FiFileText, label: 'Reports', path: '/doctor/reports' },
-    { icon: FiSettings, label: 'Settings', path: '/doctor/settings' },
+    { icon: FiUser, label: 'Profile', path: '/doctor/profile' },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {

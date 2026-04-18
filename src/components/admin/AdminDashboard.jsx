@@ -53,7 +53,7 @@ export default function AdminDashboard() {
                             Dashboard <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600">Overview</span>
                         </h1>
                         <p className="text-lg text-[#6b6490] font-bold opacity-80 max-w-2xl leading-relaxed">
-                            Welcome back, Admin. Real-time monitoring for VitalSync systems is stable. Staff utilization at 82% across all departments.
+                            Welcome back, {JSON.parse(localStorage.getItem('user') || '{}').name?.split(' ')[0] || 'Admin'}. Real-time monitoring for VitalSync systems is stable. Staff utilization at 82% across all departments.
                         </p>
                     </div>
 

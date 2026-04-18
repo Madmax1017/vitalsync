@@ -30,7 +30,7 @@ export default function DoctorDashboard() {
                     {/* Greeting */}
                     <div className="px-1">
                         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#1e1b32] mb-1">
-                            Good Morning, <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-500">Doctor</span> 👋
+                            Good Morning, <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-500">{JSON.parse(localStorage.getItem('user') || '{}').name?.split(' ')[0] || 'Doctor'}</span> 👋
                         </h1>
                         <p className="text-[14px] text-[#a09cb5] font-medium">Here's your day at a glance. You have 8 appointments today.</p>
                     </div>

@@ -65,6 +65,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                     // Success! Store user info
                     localStorage.setItem('user', JSON.stringify({
                         name: user.name,
+                        email: user.email,
                         role: user.role
                     }));
                     localStorage.setItem('userEmail', user.email);

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    FiGrid, FiUsers, FiCalendar, FiFileText, FiSettings,
+    FiGrid, FiUsers, FiCalendar, FiFileText, FiUser,
     FiLogOut, FiChevronLeft, FiChevronRight, FiHeart, FiCheckSquare
 } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -8,10 +8,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const menuItems = [
     { icon: FiGrid, label: 'Dashboard', path: '/nurse' },
     { icon: FiCheckSquare, label: 'Tasks', path: '/nurse/tasks' },
+    { icon: FiHeart, label: 'Medications', path: '/nurse/medications' },
     { icon: FiUsers, label: 'Patients', path: '/nurse/patients' },
     { icon: FiCalendar, label: 'Schedule', path: '/nurse/schedule' },
     { icon: FiFileText, label: 'Notes', path: '/nurse/notes' },
-    { icon: FiSettings, label: 'Settings', path: '/nurse/settings' },
+    { icon: FiUser, label: 'Profile', path: '/nurse/profile' },
 ];
 
 export default function NurseSidebar({ collapsed, setCollapsed }) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    FiGrid, FiUsers, FiBarChart2, FiFileText, FiSettings,
+    FiGrid, FiUsers, FiBarChart2, FiFileText, FiUser,
     FiLogOut, FiChevronLeft, FiChevronRight, FiShield, FiBriefcase
 } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,7 +10,7 @@ const menuItems = [
     { icon: FiUsers, label: 'Patients', path: '/admin/patients' },
     { icon: FiFileText, label: 'Appointments', path: '/admin/appointments' },
     { icon: FiBarChart2, label: 'Analytics', path: '/admin/analytics' },
-    { icon: FiSettings, label: 'Settings', path: '#' },
+    { icon: FiUser, label: 'Profile', path: '/admin/profile' },
 ];
 
 export default function AdminSidebar({ collapsed, setCollapsed }) {
