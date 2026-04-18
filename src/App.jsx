@@ -21,16 +21,23 @@ import NurseProfilePage from './components/nurse/NurseProfilePage';
 import AdminProfilePage from './components/admin/AdminProfilePage';
 import MedicationsPage from './components/doctor/MedicationsPage';
 import NurseMedicationsPage from './components/nurse/NurseMedicationsPage';
+import AdminStaffPage from './components/admin/AdminStaffPage';
+import CanteenPage from './components/canteen/CanteenPage';
+import NurseCanteenPage from './components/nurse/NurseCanteenPage';
+import DoctorCanteenPage from './components/doctor/DoctorCanteenPage';
+import AdminCanteenPage from './components/admin/AdminCanteenPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/canteen" element={<CanteenPage />} />
         <Route path="/doctor" element={<DoctorDashboard />} />
         <Route path="/doctor/patients" element={<PatientsPage />} />
         <Route path="/doctor/appointments" element={<AppointmentsPage />} />
         <Route path="/doctor/tasks" element={<DoctorTasksPage />} />
+        <Route path="/doctor/canteen" element={<DoctorCanteenPage />} />
         <Route path="/doctor/medications" element={<MedicationsPage />} />
         <Route path="/doctor/profile" element={<DoctorProfilePage />} />
         <Route path="/nurse" element={<NurseDashboard />} />
@@ -39,11 +46,14 @@ function App() {
         <Route path="/nurse/notes" element={<NurseNotesPage />} />
         <Route path="/nurse/schedule" element={<NurseSchedulePage />} />
         <Route path="/nurse/patients" element={<NursePatientsPage />} />
+        <Route path="/nurse/canteen" element={<NurseCanteenPage />} />
         <Route path="/nurse/profile" element={<NurseProfilePage />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="/admin/patients" element={<AdminPatientsPage />} />
         <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+        <Route path="/admin/staff" element={<AdminStaffPage />} />
+        <Route path="/admin/canteen" element={<AdminCanteenPage />} />
         <Route path="/admin/profile" element={<AdminProfilePage />} />
         <Route path="/login/doctor" element={<DoctorLogin />} />
         <Route path="/login/nurse" element={<NurseLogin />} />

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     FiGrid, FiUsers, FiCalendar, FiFileText, FiUser,
-    FiLogOut, FiChevronLeft, FiChevronRight, FiHeart, FiCheckSquare
+    FiLogOut, FiChevronLeft, FiChevronRight, FiHeart, FiCheckSquare, FiCoffee
 } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -12,6 +12,7 @@ const menuItems = [
     { icon: FiUsers, label: 'Patients', path: '/nurse/patients' },
     { icon: FiCalendar, label: 'Schedule', path: '/nurse/schedule' },
     { icon: FiFileText, label: 'Notes', path: '/nurse/notes' },
+    { icon: FiCoffee, label: 'Canteen Orders', path: '/nurse/canteen' },
     { icon: FiUser, label: 'Profile', path: '/nurse/profile' },
 ];
 
