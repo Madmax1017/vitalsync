@@ -7,6 +7,7 @@ import Sidebar from '../dashboard/Sidebar';
 import TopBar from '../dashboard/TopBar';
 import gsap from 'gsap';
 import { supabase } from '../../supabaseClient';
+import DoctorHero from '../common/DoctorHero';
 
 const priorityConfig = {
     high: { bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100', dot: 'bg-rose-500' },
@@ -31,6 +32,7 @@ export default function DoctorTasksPage() {
     const formRef = useRef(null);
 
     const userEmail = localStorage.getItem('userEmail') || '';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const [form, setForm] = useState({
         title: '',
@@ -140,11 +142,8 @@ export default function DoctorTasksPage() {
                     <TopBar />
 
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div className="space-y-1">
-                            <h1 className="text-3xl font-extrabold tracking-tight text-[#1e1b32]">Task Assignment</h1>
-                            <p className="text-[#64748b] font-medium">Assign and track tasks for your nursing team</p>
-                        </div>
+                    <DoctorHero name={user.name} />
+                    <div className="flex flex-col md:flex-row justify-end gap-6 mb-4">
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <div className="relative flex-1 md:w-64">
                                 <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] w-4.5 h-4.5" />

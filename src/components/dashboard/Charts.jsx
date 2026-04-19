@@ -116,8 +116,8 @@ export default function Charts() {
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 500 }} dy={15} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 500 }} dx={-10} />
                             <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f8fafc', strokeWidth: 2 }} />
-                            <Area type="monotone" dataKey="patients" name="Patients" stroke="#4f46e5" strokeWidth={3} strokeLinecap="round" fillOpacity={1} fill="url(#colorPatients)" activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5' }} animationDuration={1000} />
-                            <Area type="monotone" dataKey="appointments" name="Appointments" stroke="#0ea5e9" strokeWidth={3} strokeLinecap="round" fillOpacity={1} fill="url(#colorAppts)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0ea5e9' }} animationDuration={1000} />
+                            <Area type="monotone" dataKey="patients" name="Patients" stroke="#4f46e5" strokeWidth={2} strokeLinecap="round" fillOpacity={1} fill="url(#colorPatients)" activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5' }} animationDuration={1000} />
+                            <Area type="monotone" dataKey="appointments" name="Appointments" stroke="#0ea5e9" strokeWidth={2} strokeLinecap="round" fillOpacity={1} fill="url(#colorAppts)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0ea5e9' }} animationDuration={1000} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>

@@ -120,9 +120,7 @@ export default function Hero() {
                                 <div className="w-16 h-16 border-4 border-violet-400 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                         }>
-                            <Canvas camera={{ position: [0, 0, 5], fov: 45 }} className="w-full h-full">
-                                <ThreeDModel />
-                            </Canvas>
+                            <ThreeDModel />
                         </Suspense>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import DoctorHero from '../common/DoctorHero';
 import StatsCards from './StatsCards';
 import Charts from './Charts';
 import PatientList from './PatientList';
@@ -27,17 +28,14 @@ export default function DoctorDashboard() {
                 <div className="flex-1 flex flex-col gap-6 min-w-0">
                     <TopBar />
 
-                    {/* Greeting */}
-                    <div className="px-1 mt-2">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-800 mb-1">
-                            {timeGreeting}, {prefix}{nameStr}
-                        </h1>
-                        <p className="text-[14px] text-slate-500 font-medium">Here's your overview for today.</p>
-                    </div>
+                    <DoctorHero name={user.name} />
 
-                    <StatsCards />
-                    <Charts />
-                    <PatientList />
+                    {/* Bento Grid Content */}
+                    <div className="flex flex-col gap-6">
+                        <StatsCards />
+                        <Charts />
+                        <PatientList />
+                    </div>
                 </div>
 
                 {/* Right Panel */}

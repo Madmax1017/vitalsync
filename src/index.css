@@ -44,6 +44,20 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+@utility glass-patient {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@utility bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(124, 58, 237, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(124, 58, 237, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 /* -------------------------------- */
 
 html,

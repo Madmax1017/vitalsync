@@ -41,7 +41,7 @@ const roles = [
         title: 'Patient Portal',
         description: 'Access records, book appointments, and communicate with your care team.',
         icon: LuUser,
-        link: '#',
+        link: '/login/patient',
         gradient: 'from-emerald-400 to-teal-500',
         iconBg: 'bg-emerald-100',
         iconColor: 'text-emerald-600',

@@ -10,6 +10,9 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import DoctorLogin from './components/auth/DoctorLogin';
 import NurseLogin from './components/auth/NurseLogin';
 import AdminLogin from './components/auth/AdminLogin';
+import PatientLogin from './components/auth/PatientLogin';
+import PatientSignup from './components/auth/PatientSignup';
+import PatientDashboard from './components/patient/PatientDashboard';
 import NurseNotesPage from './components/nurse/NurseNotesPage';
 import NurseSchedulePage from './components/nurse/NurseSchedulePage';
 import NursePatientsPage from './components/nurse/NursePatientsPage';
@@ -53,9 +56,16 @@ function App() {
         <Route path="/admin/staff" element={<AdminStaffPage />} />
         <Route path="/admin/canteen" element={<AdminCanteenPage />} />
         <Route path="/admin/profile" element={<AdminProfilePage />} />
+
+        {/* Auth Routes */}
         <Route path="/login/doctor" element={<DoctorLogin />} />
         <Route path="/login/nurse" element={<NurseLogin />} />
         <Route path="/login/admin" element={<AdminLogin />} />
+        <Route path="/login/patient" element={<PatientLogin />} />
+        <Route path="/signup/patient" element={<PatientSignup />} />
+
+        {/* Patient Routes */}
+        <Route path="/patient/dashboard" element={<PatientDashboard />} />
       </Routes>
     </BrowserRouter>
   );

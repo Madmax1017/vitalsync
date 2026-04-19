@@ -4,6 +4,7 @@ import TopBar from '../dashboard/TopBar';
 import { supabase } from '../../supabaseClient';
 import { FiUsers, FiSearch, FiLoader, FiFilter, FiActivity, FiUser, FiMapPin, FiX, FiPlus, FiFileText, FiClipboard } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import DoctorHero from '../common/DoctorHero';
 
 export default function PatientsPage() {
     const [collapsed, setCollapsed] = useState(false);
@@ -22,6 +23,7 @@ export default function PatientsPage() {
     const navigate = useNavigate();
 
     const userEmail = localStorage.getItem('userEmail') || '';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     useEffect(() => {
         fetchData();
@@ -80,12 +82,7 @@ export default function PatientsPage() {
                 <div className="p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto space-y-8">
                     <TopBar />
 
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                        <div>
-                            <h1 className="text-3xl font-extrabold tracking-tight text-[#1e1b32]">My Patients</h1>
-                            <p className="text-[#64748b] font-medium mt-1">Review cases, vitals, and issue clinical orders</p>
-                        </div>
-                    </div>
+                    <DoctorHero name={user.name} />
 
                     <div className="flex flex-col sm:flex-row gap-4 mb-6">
                         <div className="relative flex-1">

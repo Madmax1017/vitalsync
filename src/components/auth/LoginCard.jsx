@@ -4,7 +4,7 @@ import { FiMail, FiLock, FiChevronRight, FiAlertCircle, FiLoader } from 'react-i
 import gsap from 'gsap';
 import { supabase } from '../../supabaseClient';
 
-const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
+const LoginCard = ({ roleTitle, rolePath, expectedRole, icon: Icon, gradient, children }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -62,6 +62,12 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
             if (user) {
                 // 2. Validate password
                 if (user.password === password) {
+                    // Role validation Check
+                    if (expectedRole && user.role !== expectedRole) {
+                        setError('Invalid credentials for this login portal');
+                        return;
+                    }
+
                     // Success! Store user info
                     localStorage.setItem('user', JSON.stringify({
                         name: user.name,
@@ -70,8 +76,8 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                     }));
                     localStorage.setItem('userEmail', user.email);
 
-                    // Redirect based on role
-                    navigate(`/${user.role}`);
+                    // Redirect based on provided rolePath or default
+                    navigate(rolePath || `/${user.role}`);
                 } else {
                     setError('Invalid password');
                 }
@@ -181,6 +187,7 @@ const LoginCard = ({ roleTitle, rolePath, icon: Icon, gradient }) => {
                             <p className="text-[#9ca3af] text-xs">
                                 Access your secure healthcare dashboard
                             </p>
+                            {children}
                         </div>
                     </div>
                 </div>

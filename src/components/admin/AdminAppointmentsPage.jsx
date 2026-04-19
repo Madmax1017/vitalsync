@@ -25,6 +25,19 @@ export default function AdminAppointmentsPage() {
         setLoading(false);
     };
 
+    const updateStatus = async (id, newStatus) => {
+        try {
+            const { error } = await supabase
+                .from('appointments')
+                .update({ status: newStatus })
+                .eq('id', id);
+
+            if (error) throw error;
+        } catch (err) {
+            console.error('Error updating status:', err);
+        }
+    };
+
     return (
         <div className="flex min-h-screen w-full bg-[#f8f7ff] overflow-hidden">
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -67,7 +80,7 @@ export default function AdminAppointmentsPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-extrabold text-[#1e1b32] text-[15px]">{appt.patient_name}</h3>
-                                            <span className="text-[12px] font-bold text-[#6b6490]">{appt.doctor_name || 'Unassigned'}</span>
+                                            <span className="text-[12px] font-bold text-[#6b6490]">{appt.doctor_email || 'Unassigned'}</span>
                                         </div>
                                     </div>
                                     {appt.status === 'confirmed' ? (
@@ -84,13 +97,25 @@ export default function AdminAppointmentsPage() {
                                         <FiClock className="w-4 h-4 text-amber-500" /> {appt.time}
                                     </div>
                                     <div className="flex items-center gap-3 text-[13px] font-medium text-[#6b6490]">
-                                        <FiUser className="w-4 h-4 text-blue-500" /> {appt.issue}
+                                        <FiUser className="w-4 h-4 text-blue-500" /> {appt.reason || 'No reason specified'}
                                     </div>
                                 </div>
-                                <div className="pt-4 border-t border-slate-100 text-center">
-                                    <button className="text-[13px] font-extrabold text-violet-600 hover:text-indigo-700 transition-colors">
-                                        View Details
-                                    </button>
+                                <div className="flex items-center justify-between pt-2">
+                                    <div className={`px-2 py-1 rounded text-xs font-bold uppercase ${appt.status === 'scheduled' ? 'bg-blue-50 text-blue-600' : appt.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                                        {appt.status}
+                                    </div>
+                                </div>
+                                <div className="pt-4 border-t border-slate-100 flex gap-2">
+                                    {appt.status === 'scheduled' && (
+                                        <>
+                                            <button onClick={() => updateStatus(appt.id, 'completed')} className="flex-1 text-[13px] font-bold py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors">
+                                                Complete
+                                            </button>
+                                            <button onClick={() => updateStatus(appt.id, 'cancelled')} className="flex-1 text-[13px] font-bold py-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors">
+                                                Cancel
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}
