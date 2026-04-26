@@ -11,9 +11,7 @@ const menuItems = [
     { icon: FiCalendar, label: 'Appointments', path: '/doctor/appointments' },
     { icon: FiCheckSquare, label: 'Tasks', path: '/doctor/tasks' },
     { icon: FiHeart, label: 'Medications', path: '/doctor/medications' },
-    { icon: FiBarChart2, label: 'Analytics', path: '/doctor/analytics' },
     { icon: FiCoffee, label: 'Canteen', path: '/doctor/canteen' },
-    { icon: FiFileText, label: 'Reports', path: '/doctor/reports' },
     { icon: FiUser, label: 'Profile', path: '/doctor/profile' },
 ];
 
